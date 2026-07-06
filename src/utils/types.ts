@@ -6,7 +6,7 @@ export const BaseResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 		data: dataSchema
 	});
 
-export type BaseResponse<T = any> = {
+export type BaseResponse<T = unknown> = {
 	message: string;
 	data: T;
 };

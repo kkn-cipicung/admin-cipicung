@@ -1,12 +1,31 @@
 import prettier from 'eslint-config-prettier';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import util from 'node:util';
 import js from '@eslint/js';
 import svelte from 'eslint-plugin-svelte';
 import { defineConfig, includeIgnoreFile } from 'eslint/config';
 import globals from 'globals';
 import ts from 'typescript-eslint';
 
-const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
+if (typeof util.styleText !== 'function') {
+	const ansiCodes = {
+		red: '\x1b[31m',
+		yellow: '\x1b[33m',
+		dim: '\x1b[2m',
+		bold: '\x1b[1m',
+		gray: '\x1b[90m',
+		reset: '\x1b[0m'
+	};
+	util.styleText = (format, text) => {
+		const code = ansiCodes[format];
+		return code ? `${code}${text}${ansiCodes.reset}` : text;
+	};
+}
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const gitignorePath = path.resolve(__dirname, '.gitignore');
 
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),

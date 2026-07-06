@@ -31,7 +31,9 @@ export const findNewsById = async (payload: FindNewsPayload): Promise<FindNewsRe
 	return data;
 };
 
-export const findNewsByDate = async (payload: FindNewsByDatePayload): Promise<FindNewsByDateResponse> => {
+export const findNewsByDate = async (
+	payload: FindNewsByDatePayload
+): Promise<FindNewsByDateResponse> => {
 	const { data } = await api.post<FindNewsByDateResponse>('/news/find-by-date', payload);
 	return data;
 };
