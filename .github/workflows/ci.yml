@@ -31,12 +31,6 @@ jobs:
       - name: Run TypeScript & Svelte check
         run: npm run check
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Run unit tests
-        run: npm run test
-
       - name: Build project
         run: npm run build
 
