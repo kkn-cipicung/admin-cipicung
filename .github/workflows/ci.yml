@@ -96,6 +96,7 @@ jobs:
             npm run build
 
             echo "Restarting PM2..."
-            pm2 restart admin-cipicung || npx pm2 restart admin-cipicung || pm2 restart all
+            pm2 delete admin-cipicung || npx pm2 delete admin-cipicung || true
+            PORT=3020 pm2 start build/index.js --name "admin-cipicung" || PORT=3020 npx pm2 start build/index.js --name "admin-cipicung"
 
             echo "Deployment finished successfully."
