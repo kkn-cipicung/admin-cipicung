@@ -1,4 +1,4 @@
-import api from '../../../utils/axios';
+import api from '../../../lib/axios';
 import type {
 	CreatePotentialPayload,
 	ListPotentialPayload,
@@ -31,7 +31,7 @@ export const listPotentials = async (
 export const findPotentialById = async (
 	payload: FindPotentialPayload
 ): Promise<FindPotentialResponse> => {
-	const { data } = await api.post<FindPotentialResponse>('/potential/find', payload);
+	const { data } = await api.post<FindPotentialResponse>('/potential/detail', payload);
 	return data;
 };
 

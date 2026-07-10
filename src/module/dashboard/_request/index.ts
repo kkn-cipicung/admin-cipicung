@@ -1,4 +1,4 @@
-import api from '../../../utils/axios';
+import api from '../../../lib/axios';
 import type {
 	CreateDashboardPayload,
 	ListDashboardPayload,
@@ -31,7 +31,7 @@ export const listDashboards = async (
 export const findDashboardById = async (
 	payload: FindDashboardPayload
 ): Promise<FindDashboardResponse> => {
-	const { data } = await api.post<FindDashboardResponse>('/dashboard/find', payload);
+	const { data } = await api.post<FindDashboardResponse>('/dashboard/detail', payload);
 	return data;
 };
 

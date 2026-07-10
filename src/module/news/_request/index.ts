@@ -1,4 +1,4 @@
-import api from '../../../utils/axios';
+import api from '../../../lib/axios';
 import type {
 	CreateNewsPayload,
 	ListNewsPayload,
@@ -27,7 +27,7 @@ export const listNews = async (payload?: ListNewsPayload): Promise<ListNewsRespo
 };
 
 export const findNewsById = async (payload: FindNewsPayload): Promise<FindNewsResponse> => {
-	const { data } = await api.post<FindNewsResponse>('/news/find', payload);
+	const { data } = await api.post<FindNewsResponse>('/news/detail', payload);
 	return data;
 };
 

@@ -15,6 +15,9 @@ export default defineConfig({
 			adapter: adapter()
 		})
 	],
+	ssr: {
+		noExternal: ['@lucide/svelte']
+	},
 	server: {
 		port: 3020,
 		strictPort: true

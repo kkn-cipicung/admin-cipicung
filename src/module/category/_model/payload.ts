@@ -6,7 +6,6 @@ export type CategoryType = z.infer<typeof CategoryTypeSchema>;
 
 export const CreateCategoryPayloadSchema = z.object({
 	name: z.string(),
-	slug: z.string(),
 	type: CategoryTypeSchema
 });
 export type CreateCategoryPayload = z.infer<typeof CreateCategoryPayloadSchema>;
@@ -24,7 +23,6 @@ export type FindCategoryPayload = z.infer<typeof FindCategoryPayloadSchema>;
 export const UpdateCategoryPayloadSchema = z.object({
 	id: z.number(),
 	name: z.string(),
-	slug: z.string(),
 	type: CategoryTypeSchema
 });
 export type UpdateCategoryPayload = z.infer<typeof UpdateCategoryPayloadSchema>;

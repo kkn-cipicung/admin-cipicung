@@ -1,4 +1,4 @@
-import api from '../../../utils/axios';
+import api from '../../../lib/axios';
 import type { PingResponse } from '../_model/response';
 
 export const pingServer = async (): Promise<PingResponse> => {

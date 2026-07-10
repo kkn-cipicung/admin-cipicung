@@ -1,3 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+@theme {
+	--font-sans: 'Inter', system-ui, sans-serif;
+
+	/* Custom brand color variables */
+	--color-taupe-50: #faf9f7;
+	--color-taupe-100: #f2eee9;
+	--color-taupe-200: #e5dcd3;
+	--color-taupe-300: #d3c4b5;
+	--color-taupe-400: #bca792;
+	--color-taupe-500: #8d7557;
+	--color-taupe-600: #776249;
+	--color-taupe-700: #61503c;
+	--color-taupe-800: #4d3f30;
+	--color-taupe-900: #392f24;
+
+	--color-sage-50: #fcfdfc;
+	--color-sage-100: #f3f6f5;
+	--color-sage-200: #e4ebe8;
+	--color-sage-300: #cedcd6;
+	--color-sage-400: #b4c9c0;
+	--color-sage-500: #9faea7;
+	--color-sage-600: #809189;
+	--color-sage-700: #64746d;
+	--color-sage-800: #4c5953;
+	--color-sage-900: #39423e;
+
+	--color-gold-50: #fefcf9;
+	--color-gold-100: #fcf5e7;
+	--color-gold-200: #fae9cb;
+	--color-gold-300: #f5d7a5;
+	--color-gold-400: #ebd6b7;
+	--color-gold-500: #bd9055;
+	--color-gold-600: #a37a44;
+	--color-gold-700: #856133;
+	--color-gold-800: #694b26;
+	--color-gold-900: #4f361a;
+
+	--color-abuhijau-50: #fcfdfc;
+	--color-abuhijau-100: #f0f2f1;
+	--color-abuhijau-200: #dee2e1;
+	--color-abuhijau-300: #c4cbca;
+	--color-abuhijau-400: #a1adab;
+	--color-abuhijau-500: #6f7e78;
+	--color-abuhijau-600: #5a6762;
+	--color-abuhijau-700: #4a5450;
+	--color-abuhijau-800: #3b4340;
+	--color-abuhijau-900: #2f3533;
+
+	--color-hijaugelap-50: #f2f4f2;
+	--color-hijaugelap-100: #e2e6e1;
+	--color-hijaugelap-200: #c3ccc0;
+	--color-hijaugelap-300: #9fae9a;
+	--color-hijaugelap-400: #798b74;
+	--color-hijaugelap-500: #576852;
+	--color-hijaugelap-600: #3c443a;
+	--color-hijaugelap-700: #31372f;
+	--color-hijaugelap-800: #262c25;
+	--color-hijaugelap-900: #1c201b;
+
+	--color-royal-50: #f0f7fe;
+	--color-royal-100: #e0effc;
+	--color-royal-200: #badaf9;
+	--color-royal-300: #83bbf5;
+	--color-royal-400: #4696ee;
+	--color-royal-500: #2172c1;
+	--color-royal-600: #1c5fa3;
+	--color-royal-700: #154d85;
+	--color-royal-800: #103b67;
+	--color-royal-900: #0a2949;
+
+	/* Override standard tailwind colors for backward compatibility */
+	--color-blue-50: var(--color-taupe-50);
+	--color-blue-100: var(--color-taupe-100);
+	--color-blue-200: var(--color-taupe-200);
+	--color-blue-300: var(--color-taupe-300);
+	--color-blue-400: var(--color-taupe-400);
+	--color-blue-500: var(--color-taupe-500);
+	--color-blue-600: var(--color-taupe-500);
+	--color-blue-650: var(--color-taupe-600);
+	--color-blue-700: var(--color-taupe-700);
+	--color-blue-800: var(--color-taupe-800);
+	--color-blue-900: var(--color-taupe-900);
+
+	--color-indigo-50: var(--color-taupe-50);
+	--color-indigo-100: var(--color-taupe-100);
+	--color-indigo-200: var(--color-taupe-200);
+	--color-indigo-300: var(--color-taupe-300);
+	--color-indigo-400: var(--color-taupe-400);
+	--color-indigo-500: var(--color-taupe-500);
+	--color-indigo-600: var(--color-taupe-600);
+	--color-indigo-650: var(--color-taupe-700);
+	--color-indigo-700: var(--color-taupe-700);
+	--color-indigo-800: var(--color-taupe-800);
+	--color-indigo-900: var(--color-taupe-900);
+
+	--color-emerald-50: var(--color-sage-50);
+	--color-emerald-100: var(--color-sage-100);
+	--color-emerald-200: var(--color-sage-200);
+	--color-emerald-300: var(--color-sage-300);
+	--color-emerald-400: var(--color-sage-400);
+	--color-emerald-500: var(--color-sage-500);
+	--color-emerald-600: var(--color-sage-600);
+	--color-emerald-700: var(--color-sage-700);
+	--color-emerald-800: var(--color-sage-800);
+	--color-emerald-900: var(--color-sage-900);
+
+	--color-purple-50: var(--color-taupe-50);
+	--color-purple-100: var(--color-taupe-100);
+	--color-purple-200: var(--color-taupe-200);
+	--color-purple-300: var(--color-taupe-300);
+	--color-purple-400: var(--color-taupe-400);
+	--color-purple-500: var(--color-taupe-500);
+	--color-purple-600: var(--color-taupe-600);
+	--color-purple-700: var(--color-taupe-700);
+	--color-purple-800: var(--color-taupe-800);
+	--color-purple-900: var(--color-taupe-900);
+
+	--color-amber-50: var(--color-taupe-50);
+	--color-amber-100: var(--color-taupe-100);
+	--color-amber-200: var(--color-taupe-200);
+	--color-amber-300: var(--color-taupe-300);
+	--color-amber-400: var(--color-taupe-400);
+	--color-amber-500: var(--color-taupe-500);
+	--color-amber-600: var(--color-taupe-600);
+	--color-amber-700: var(--color-taupe-700);
+	--color-amber-800: var(--color-taupe-800);
+	--color-amber-900: var(--color-taupe-900);
+}

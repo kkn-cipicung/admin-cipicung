@@ -1,5 +1,5 @@
-import { API_URL } from './core';
-import { getErrorResponse } from './response-handler';
+import { API_URL } from '../utils/core';
+import { getErrorResponse } from '../utils/response-handler';
 import type { AxiosError } from 'axios';
 
 export type { AxiosError };
@@ -7,7 +7,7 @@ export type { AxiosError };
 import Axios from 'axios';
 
 const axios = Axios.create({
-	baseURL: API_URL
+	baseURL: API_URL + '/api'
 });
 
 type ResponseBody = {
@@ -15,6 +15,8 @@ type ResponseBody = {
 	message?: unknown;
 	msg?: unknown;
 };
+
+const AUTH_LOGIN_PATH = '/auth/login';
 
 const getResponseMessage = (data: unknown) => {
 	if (!data || typeof data !== 'object') return '';
@@ -30,6 +32,20 @@ const isBinaryResponseData = (data: unknown) =>
 	(typeof Blob !== 'undefined' && data instanceof Blob) ||
 	(typeof ArrayBuffer !== 'undefined' && data instanceof ArrayBuffer);
 
+const isUnauthorizedMessage = (message: unknown) =>
+	typeof message === 'string' && message.toLowerCase() === 'unauthorized';
+
+const redirectToAuth = () => {
+	if (typeof window === 'undefined') return;
+
+	localStorage.removeItem('token');
+	document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+
+	if (!window.location.pathname.startsWith('/auth/')) {
+		window.location.href = AUTH_LOGIN_PATH;
+	}
+};
+
 axios.interceptors.response.use(
 	(response) => {
 		if (
@@ -44,6 +60,10 @@ axios.interceptors.response.use(
 				...response.data,
 				message: normalizedMessage || undefined
 			};
+
+			if (isUnauthorizedMessage(normalizedMessage)) {
+				redirectToAuth();
+			}
 		}
 
 		return response;
@@ -55,6 +75,10 @@ axios.interceptors.response.use(
 		};
 		normalizedError.apiResponse = apiResponse;
 		normalizedError.message = apiResponse.message ?? normalizedError.message;
+
+		if (error.response?.status === 401 || isUnauthorizedMessage(apiResponse.message)) {
+			redirectToAuth();
+		}
 
 		return Promise.reject(error);
 	}

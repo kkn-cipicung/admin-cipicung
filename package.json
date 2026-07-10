@@ -8,6 +8,7 @@
 		"build": "vite build && node postbuild.js",
 		"preview": "vite preview",
 		"start": "PORT=3020 node build",
+		"test": "npm run check",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -38,7 +39,10 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@lucide/svelte": "^1.23.0",
+		"@tanstack/svelte-query": "^6.1.36",
 		"axios": "^1.18.1",
+		"lucide-svelte": "^1.0.1",
 		"zod": "^4.4.3"
 	}
 }

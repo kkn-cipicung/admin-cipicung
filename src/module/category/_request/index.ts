@@ -1,4 +1,4 @@
-import api from '../../../utils/axios';
+import api from '../../../lib/axios';
 import type {
 	CreateCategoryPayload,
 	ListCategoryPayload,
@@ -31,7 +31,7 @@ export const listCategories = async (
 export const findCategoryById = async (
 	payload: FindCategoryPayload
 ): Promise<FindCategoryResponse> => {
-	const { data } = await api.post<FindCategoryResponse>('/category/find', payload);
+	const { data } = await api.post<FindCategoryResponse>('/category/detail', payload);
 	return data;
 };
 
