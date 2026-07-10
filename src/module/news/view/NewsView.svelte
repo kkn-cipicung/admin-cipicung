@@ -2,7 +2,6 @@
 	import type { NewsData } from '../_model/response';
 	import { listNews, createNews, updateNews, deleteNews } from '../_request';
 	import { listCategories } from '../../category/_request';
-	import type { CategoryData } from '../../category/_model/response';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import {
 		Table,
