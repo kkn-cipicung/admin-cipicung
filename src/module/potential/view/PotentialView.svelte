@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PotentialData } from '../_model/response';
 	import { listPotentials, createPotential, updatePotential, deletePotential } from '../_request';
+	import { listCategories } from '../../category/_request';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import {
 		Table,
@@ -21,9 +22,16 @@
 		queryKey: ['potentials', 'list'],
 		queryFn: () => listPotentials()
 	}));
+	const categoriesQuery = createQuery(() => ({
+		queryKey: ['categories', 'list', 'potential'],
+		queryFn: () => listCategories({ type: 'potential' })
+	}));
 
 	let potentials = $derived(potentialsQuery.data?.data || []);
-	let isLoading = $derived(potentialsQuery.isPending);
+	let categories = $derived(
+		(categoriesQuery.data?.data || []).filter((category) => category.type === 'potential')
+	);
+	let isLoading = $derived(potentialsQuery.isPending || categoriesQuery.isPending);
 
 	let isDialogOpen = $state(false);
 	let editingItem = $state<PotentialData | null>(null);
@@ -47,7 +55,7 @@
 			subtitle: '',
 			slug: '',
 			description: '',
-			category_id: 1,
+			category_id: getDefaultCategoryId(),
 			location_id: 1,
 			media_id: 1,
 			owner_name: '',
@@ -55,6 +63,15 @@
 			uploaded_by: 101
 		};
 		isDialogOpen = true;
+	}
+
+	function getCategoryName(categoryId: number) {
+		const category = categories.find((item) => item.id === categoryId);
+		return category ? category.name : `#${categoryId}`;
+	}
+
+	function getDefaultCategoryId() {
+		return categories.length > 0 ? categories[0].id : 1;
 	}
 
 	function handleEdit(item: PotentialData) {
@@ -164,7 +181,7 @@
 					<TableHead>Potensi / UMKM</TableHead>
 					<TableHead>Slug & Subtitle</TableHead>
 					<TableHead>Deskripsi</TableHead>
-					<TableHead class="text-center">Cat. ID</TableHead>
+					<TableHead class="text-center">Kategori</TableHead>
 					<TableHead class="text-center">Loc. ID</TableHead>
 					<TableHead class="text-center">Media ID</TableHead>
 					<TableHead>Pengelola & Kontak</TableHead>
@@ -195,9 +212,9 @@
 							>
 							<TableCell class="text-center">
 								<span
-									class="inline-flex h-6 w-8 items-center justify-center rounded bg-slate-100 text-xs font-bold text-slate-600"
+									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-purple-50 text-xs font-bold text-purple-700"
 								>
-									{item.category_id}
+									{item.category_name || getCategoryName(item.category_id)}
 								</span>
 							</TableCell>
 							<TableCell class="text-center">
@@ -289,10 +306,21 @@
 
 		<div class="grid grid-cols-3 gap-3">
 			<div class="space-y-1.5">
-				<label for="edit-cat" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-					>Cat. ID</label
+				<label
+					for="edit-category"
+					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Kategori</label
 				>
-				<Input type="number" id="edit-cat" bind:value={editForm.category_id} required />
+				<select
+					id="edit-category"
+					bind:value={editForm.category_id}
+					required
+					class="w-full rounded-xl border border-slate-250 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+				>
+					<option value={0} disabled>Pilih Kategori</option>
+					{#each categories as category (category.id)}
+						<option value={category.id}>{category.name}</option>
+					{/each}
+				</select>
 			</div>
 			<div class="space-y-1.5">
 				<label for="edit-loc" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"

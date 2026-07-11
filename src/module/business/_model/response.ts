@@ -4,6 +4,7 @@ import { BaseResponseSchema } from '../../../utils/types';
 export const BusinessDataSchema = z.object({
 	id: z.number(),
 	category_id: z.number(),
+	category_name: z.string().optional(),
 	owner_name: z.string(),
 	business_name: z.string(),
 	description: z.string(),

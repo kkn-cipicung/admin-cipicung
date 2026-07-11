@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { DashboardData } from '../_model/response';
 	import { listDashboards, createDashboard, updateDashboard, deleteDashboard } from '../_request';
+	import { listCategories } from '../../category/_request';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import {
 		Table,
@@ -21,9 +22,14 @@
 		queryKey: ['dashboards', 'list'],
 		queryFn: () => listDashboards()
 	}));
+	const categoriesQuery = createQuery(() => ({
+		queryKey: ['categories', 'list'],
+		queryFn: () => listCategories()
+	}));
 
 	let dashboardItems = $derived(dashboardsQuery.data?.data || []);
-	let isLoading = $derived(dashboardsQuery.isPending);
+	let categories = $derived(categoriesQuery.data?.data || []);
+	let isLoading = $derived(dashboardsQuery.isPending || categoriesQuery.isPending);
 
 	let isDialogOpen = $state(false);
 	let editingItem = $state<DashboardData | null>(null);
@@ -39,10 +45,15 @@
 		editForm = {
 			title: '',
 			description: '',
-			category_id: 1,
+			category_id: categories.length > 0 ? categories[0].id : 1,
 			created_by: 101
 		};
 		isDialogOpen = true;
+	}
+
+	function getCategoryName(categoryId: number) {
+		const category = categories.find((item) => item.id === categoryId);
+		return category ? `${category.name} (${category.type})` : `#${categoryId}`;
 	}
 
 	function handleEdit(item: DashboardData) {
@@ -139,8 +150,8 @@
 					<TableHead class="w-16 text-center">No</TableHead>
 					<TableHead>Judul Konten</TableHead>
 					<TableHead>Deskripsi Slide</TableHead>
-					<TableHead class="text-center">Cat. ID</TableHead>
-					<TableHead class="text-center">Editor ID</TableHead>
+					<TableHead class="text-center">Kategori</TableHead>
+					<TableHead class="text-center">Editor</TableHead>
 					<TableHead>Tanggal Dibuat</TableHead>
 					<TableHead class="text-right">Aksi</TableHead>
 				</TableRow>
@@ -162,16 +173,16 @@
 							>
 							<TableCell class="text-center">
 								<span
-									class="inline-flex h-6 w-8 items-center justify-center rounded bg-slate-100 text-xs font-bold text-slate-600"
+									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-slate-100 text-xs font-bold text-slate-650"
 								>
-									{item.category_id}
+									{item.category_name || getCategoryName(item.category_id)}
 								</span>
 							</TableCell>
 							<TableCell class="text-center">
 								<span
-									class="inline-flex h-6 w-10 items-center justify-center rounded bg-blue-50 text-xs font-bold text-blue-700"
+									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-blue-50 text-xs font-bold text-blue-700"
 								>
-									#{item.created_by}
+									{item.creator_name || '#' + item.created_by}
 								</span>
 							</TableCell>
 							<TableCell class="text-xs text-slate-500 whitespace-nowrap"
@@ -230,10 +241,21 @@
 
 		<div class="grid grid-cols-2 gap-4">
 			<div class="space-y-1.5">
-				<label for="edit-cat" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-					>Category ID</label
+				<label
+					for="edit-category"
+					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Kategori</label
 				>
-				<Input type="number" id="edit-cat" bind:value={editForm.category_id} required />
+				<select
+					id="edit-category"
+					bind:value={editForm.category_id}
+					required
+					class="w-full rounded-xl border border-slate-250 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+				>
+					<option value={0} disabled>Pilih Kategori</option>
+					{#each categories as category (category.id)}
+						<option value={category.id}>{category.name} ({category.type})</option>
+					{/each}
+				</select>
 			</div>
 			{#if !editingItem}
 				<div class="space-y-1.5">

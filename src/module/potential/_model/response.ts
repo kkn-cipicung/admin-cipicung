@@ -4,6 +4,7 @@ import { BaseResponseSchema } from '../../../utils/types';
 export const PotentialDataSchema = z.object({
 	id: z.number(),
 	category_id: z.number(),
+	category_name: z.string().optional(),
 	title: z.string(),
 	subtitle: z.string(),
 	slug: z.string(),

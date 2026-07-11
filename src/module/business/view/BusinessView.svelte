@@ -260,7 +260,7 @@
 								<span
 									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-amber-50 text-xs font-bold text-amber-700"
 								>
-									{getCategoryName(business.category_id)}
+									{business.category_name || getCategoryName(business.category_id)}
 								</span>
 							</TableCell>
 							<TableCell class="text-xs">

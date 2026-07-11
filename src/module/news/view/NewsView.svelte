@@ -186,7 +186,7 @@
 					<TableHead>Judul Konten</TableHead>
 					<TableHead>Ringkasan Deskripsi</TableHead>
 					<TableHead class="text-center">Kategori</TableHead>
-					<TableHead class="text-center">Editor ID</TableHead>
+					<TableHead class="text-center">Editor</TableHead>
 					<TableHead>Tanggal Unggah</TableHead>
 					<TableHead class="text-right">Aksi</TableHead>
 				</TableRow>
@@ -212,14 +212,14 @@
 								<span
 									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-slate-100 text-xs font-bold text-slate-650"
 								>
-									{getCategoryName(article.category_id)}
+									{article.category_name || getCategoryName(article.category_id)}
 								</span>
 							</TableCell>
 							<TableCell class="text-center">
 								<span
-									class="inline-flex h-6 w-10 items-center justify-center rounded bg-blue-50 text-xs font-bold text-blue-700"
+									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-blue-50 text-xs font-bold text-blue-700"
 								>
-									#{article.uploaded_by}
+									{article.uploader_name || '#' + article.uploaded_by}
 								</span>
 							</TableCell>
 							<TableCell class="text-xs text-slate-500 whitespace-nowrap"

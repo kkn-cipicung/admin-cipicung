@@ -4,7 +4,9 @@ import { BaseResponseSchema } from '../../../utils/types';
 export const DashboardDataSchema = z.object({
 	id: z.number(),
 	created_by: z.number(),
+	creator_name: z.string().optional(),
 	category_id: z.number(),
+	category_name: z.string().optional(),
 	title: z.string(),
 	description: z.string(),
 	created_at: z.string()
