@@ -2,17 +2,22 @@ import { z } from 'zod';
 import { PaginationParamsSchema } from '../../../utils/types';
 
 export const CreatePotentialPayloadSchema = z.object({
-	uploaded_by: z.number(),
 	category_id: z.number(),
 	title: z.string(),
-	subtitle: z.string(),
+	subtitle: z.string().optional(),
 	slug: z.string(),
 	description: z.string(),
-	latitude: z.number(),
-	longitude: z.number(),
+	location: z
+		.object({
+			latitude: z.number().optional(),
+			longitude: z.number().optional(),
+			title: z.string().optional(),
+			description: z.string().optional()
+		})
+		.optional(),
 	owner_name: z.string(),
-	owner_msisdn: z.string(),
-	img_id: z.string().optional()
+	owner_msisdn: z.string().optional(),
+	media_id: z.string().nullable().optional()
 });
 export type CreatePotentialPayload = z.infer<typeof CreatePotentialPayloadSchema>;
 
@@ -28,14 +33,20 @@ export const UpdatePotentialPayloadSchema = z.object({
 	id: z.number(),
 	category_id: z.number(),
 	title: z.string(),
-	subtitle: z.string(),
+	subtitle: z.string().optional(),
 	slug: z.string(),
 	description: z.string(),
-	latitude: z.number(),
-	longitude: z.number(),
+	location: z
+		.object({
+			latitude: z.number().optional(),
+			longitude: z.number().optional(),
+			title: z.string().optional(),
+			description: z.string().optional()
+		})
+		.optional(),
 	owner_name: z.string(),
-	owner_msisdn: z.string(),
-	img_id: z.string().optional()
+	owner_msisdn: z.string().optional(),
+	media_id: z.string().nullable().optional()
 });
 export type UpdatePotentialPayload = z.infer<typeof UpdatePotentialPayloadSchema>;
 

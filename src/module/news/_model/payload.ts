@@ -2,11 +2,10 @@ import { z } from 'zod';
 import { PaginationParamsSchema } from '../../../utils/types';
 
 export const CreateNewsPayloadSchema = z.object({
-	uploaded_by: z.number(),
 	category_id: z.number(),
 	title: z.string(),
 	description: z.string(),
-	img_id: z.string().optional()
+	media_id: z.string().nullable().optional()
 });
 export type CreateNewsPayload = z.infer<typeof CreateNewsPayloadSchema>;
 
@@ -28,7 +27,7 @@ export const UpdateNewsPayloadSchema = z.object({
 	category_id: z.number(),
 	title: z.string(),
 	description: z.string(),
-	img_id: z.string().optional()
+	media_id: z.string().nullable().optional()
 });
 export type UpdateNewsPayload = z.infer<typeof UpdateNewsPayloadSchema>;
 

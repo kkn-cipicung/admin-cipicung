@@ -3,12 +3,12 @@ import { BaseResponseSchema } from '../../../utils/types';
 
 export const DashboardDataSchema = z.object({
 	id: z.number(),
-	created_by: z.number(),
-	creator_name: z.string().optional(),
-	category_id: z.number(),
-	category_name: z.string().optional(),
+	creator: z.object({ id: z.number(), name: z.string() }),
+	category: z.object({ id: z.number(), name: z.string() }),
 	title: z.string(),
 	description: z.string(),
+	media_id: z.number().nullable(),
+	is_active: z.boolean(),
 	created_at: z.string()
 });
 export type DashboardData = z.infer<typeof DashboardDataSchema>;
@@ -27,3 +27,6 @@ export type UpdateDashboardResponse = z.infer<typeof UpdateDashboardResponseSche
 
 export const DeleteDashboardResponseSchema = BaseResponseSchema(z.null());
 export type DeleteDashboardResponse = z.infer<typeof DeleteDashboardResponseSchema>;
+
+export const ActivateDashboardResponseSchema = BaseResponseSchema(z.null());
+export type ActivateDashboardResponse = z.infer<typeof ActivateDashboardResponseSchema>;

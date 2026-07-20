@@ -15,6 +15,9 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import ImageUploader from '$lib/components/ui/ImageUploader.svelte';
+	import CategorySelect from '$lib/components/ui/CategorySelect.svelte';
+	import MediaThumbnail from '$lib/components/ui/MediaThumbnail.svelte';
 	import { Plus, Search, Loader2, Pencil, Trash2 } from '@lucide/svelte';
 
 	const queryClient = useQueryClient();
@@ -24,45 +27,57 @@
 	}));
 	const categoriesQuery = createQuery(() => ({
 		queryKey: ['categories', 'list', 'potential'],
-		queryFn: () => listCategories({ type: 'potential' })
+		queryFn: () => listCategories()
 	}));
 
 	let potentials = $derived(potentialsQuery.data?.data || []);
-	let categories = $derived(
-		(categoriesQuery.data?.data || []).filter((category) => category.type === 'potential')
-	);
+	let categories = $derived(categoriesQuery.data?.data || []);
 	let isLoading = $derived(potentialsQuery.isPending || categoriesQuery.isPending);
+	let searchQuery = $state('');
+	let filteredPotentials = $derived(
+		potentials.filter((item) => {
+			const query = searchQuery.toLowerCase();
+			return searchQuery
+				? item.title.toLowerCase().includes(query) ||
+						(item.subtitle || '').toLowerCase().includes(query) ||
+						item.description.toLowerCase().includes(query) ||
+						item.owner.name.toLowerCase().includes(query)
+				: true;
+		})
+	);
 
 	let isDialogOpen = $state(false);
 	let editingItem = $state<PotentialData | null>(null);
+	let isPreparingForm = $state(false);
 	let editForm = $state({
 		title: '',
 		subtitle: '',
 		slug: '',
 		description: '',
-		category_id: 1,
-		location_id: 1,
-		media_id: 1,
+		category_id: 0,
 		owner_name: '',
 		owner_msisdn: '',
-		uploaded_by: 101
+		media_id: ''
 	});
 
-	function handleCreate() {
+	async function handleCreate() {
+		isPreparingForm = true;
+		const categoryResult = categories.length > 0 ? null : await categoriesQuery.refetch();
+		const latestCategories = categoryResult?.data?.data || categories;
+
 		editingItem = null;
 		editForm = {
 			title: '',
 			subtitle: '',
 			slug: '',
 			description: '',
-			category_id: getDefaultCategoryId(),
-			location_id: 1,
-			media_id: 1,
+			category_id: getDefaultCategoryId(latestCategories),
 			owner_name: '',
 			owner_msisdn: '',
-			uploaded_by: 101
+			media_id: ''
 		};
 		isDialogOpen = true;
+		isPreparingForm = false;
 	}
 
 	function getCategoryName(categoryId: number) {
@@ -70,29 +85,28 @@
 		return category ? category.name : `#${categoryId}`;
 	}
 
-	function getDefaultCategoryId() {
-		return categories.length > 0 ? categories[0].id : 1;
+	function getDefaultCategoryId(items = categories) {
+		return items.length > 0 ? items[0].id : 0;
 	}
 
 	function handleEdit(item: PotentialData) {
 		editingItem = item;
 		editForm = {
 			title: item.title,
-			subtitle: item.subtitle,
+			subtitle: item.subtitle || '',
 			slug: item.slug,
 			description: item.description,
-			category_id: item.category_id,
-			location_id: item.location_id,
-			media_id: item.media_id,
-			owner_name: item.owner_name,
-			owner_msisdn: item.owner_msisdn,
-			uploaded_by: 101
+			category_id: item.category.id,
+			owner_name: item.owner.name,
+			owner_msisdn: item.owner.msisdn || '',
+			media_id: ''
 		};
 		isDialogOpen = true;
 	}
 
 	async function handleSave(e: Event) {
 		e.preventDefault();
+		const mediaId = editForm.media_id.trim();
 		try {
 			if (editingItem) {
 				await updatePotential({
@@ -102,23 +116,20 @@
 					subtitle: editForm.subtitle,
 					slug: editForm.slug,
 					description: editForm.description,
-					latitude: 0,
-					longitude: 0,
 					owner_name: editForm.owner_name,
-					owner_msisdn: editForm.owner_msisdn
+					owner_msisdn: editForm.owner_msisdn || undefined,
+					media_id: mediaId || null
 				});
 			} else {
 				await createPotential({
-					uploaded_by: Number(editForm.uploaded_by),
 					category_id: Number(editForm.category_id),
 					title: editForm.title,
 					subtitle: editForm.subtitle,
 					slug: editForm.slug,
 					description: editForm.description,
-					latitude: 0,
-					longitude: 0,
 					owner_name: editForm.owner_name,
-					owner_msisdn: editForm.owner_msisdn
+					owner_msisdn: editForm.owner_msisdn || undefined,
+					media_id: mediaId || null
 				});
 			}
 			isDialogOpen = false;
@@ -149,9 +160,14 @@
 				Kelola data potensi wisata, produk UMKM lokal, dan komoditas unggulan desa.
 			</p>
 		</div>
-		<Button onclick={handleCreate}>
-			<Plus size={16} strokeWidth={2.5} />
-			Tambah Potensi Baru
+		<Button onclick={handleCreate} disabled={isPreparingForm || categoriesQuery.isPending}>
+			{#if isPreparingForm || categoriesQuery.isPending}
+				<Loader2 size={16} class="animate-spin" />
+				Memuat Kategori...
+			{:else}
+				<Plus size={16} strokeWidth={2.5} />
+				Tambah Potensi Baru
+			{/if}
 		</Button>
 	</div>
 
@@ -162,7 +178,11 @@
 			<span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
 				<Search size={16} />
 			</span>
-			<Input placeholder="Cari potensi atau nama pemilik..." class="pl-9 bg-slate-50/50" />
+			<Input
+				placeholder="Cari potensi atau nama pemilik..."
+				class="pl-9 bg-slate-50/50"
+				bind:value={searchQuery}
+			/>
 		</div>
 	</div>
 
@@ -178,27 +198,29 @@
 			<TableHeader>
 				<TableRow>
 					<TableHead class="w-16 text-center">No</TableHead>
+					<TableHead class="w-24 text-center">Gambar</TableHead>
 					<TableHead>Potensi / UMKM</TableHead>
 					<TableHead>Slug & Subtitle</TableHead>
 					<TableHead>Deskripsi</TableHead>
 					<TableHead class="text-center">Kategori</TableHead>
-					<TableHead class="text-center">Loc. ID</TableHead>
-					<TableHead class="text-center">Media ID</TableHead>
 					<TableHead>Pengelola & Kontak</TableHead>
 					<TableHead class="text-right">Aksi</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#if potentials.length === 0}
+				{#if filteredPotentials.length === 0}
 					<TableRow>
-						<TableCell colspan={9} class="text-center py-8 text-slate-400 font-medium">
+						<TableCell colspan={8} class="text-center py-8 text-slate-400 font-medium">
 							Belum ada data potensi & UMKM.
 						</TableCell>
 					</TableRow>
 				{:else}
-					{#each potentials as item, index (item.id)}
+					{#each filteredPotentials as item, index (item.id)}
 						<TableRow>
 							<TableCell class="text-center font-bold text-slate-400">{index + 1}</TableCell>
+							<TableCell class="text-center">
+								<MediaThumbnail media={item.media_id} alt={item.title} />
+							</TableCell>
 							<TableCell class="font-bold text-slate-900">{item.title}</TableCell>
 							<TableCell class="max-w-xs text-xs">
 								<span class="block font-semibold text-slate-550 truncate">{item.subtitle}</span>
@@ -214,27 +236,13 @@
 								<span
 									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-purple-50 text-xs font-bold text-purple-700"
 								>
-									{item.category_name || getCategoryName(item.category_id)}
-								</span>
-							</TableCell>
-							<TableCell class="text-center">
-								<span
-									class="inline-flex h-6 w-10 items-center justify-center rounded bg-slate-100 text-xs font-bold text-slate-600"
-								>
-									#{item.location_id}
-								</span>
-							</TableCell>
-							<TableCell class="text-center">
-								<span
-									class="inline-flex h-6 w-10 items-center justify-center rounded bg-blue-50 text-xs font-bold text-blue-700"
-								>
-									M:{item.media_id}
+									{item.category.name || getCategoryName(item.category.id)}
 								</span>
 							</TableCell>
 							<TableCell class="text-xs">
-								<span class="block font-bold text-slate-900">{item.owner_name}</span>
+								<span class="block font-bold text-slate-900">{item.owner.name}</span>
 								<span class="block text-slate-400 text-[11px] font-semibold mt-0.5"
-									>{item.owner_msisdn}</span
+									>{item.owner.msisdn}</span
 								>
 							</TableCell>
 							<TableCell class="text-right whitespace-nowrap">
@@ -274,15 +282,15 @@
 		: 'Tambah komoditas desa baru'}
 >
 	<form onsubmit={handleSave} class="flex flex-col p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-		<div class="grid grid-cols-2 gap-4">
-			<div class="space-y-1.5">
+		<div class="grid gap-4 md:grid-cols-2">
+			<div class="min-w-0 space-y-1.5">
 				<label
 					for="edit-title"
 					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Nama Potensi</label
 				>
 				<Input id="edit-title" bind:value={editForm.title} required />
 			</div>
-			<div class="space-y-1.5">
+			<div class="min-w-0 space-y-1.5">
 				<label for="edit-sub" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
 					>Subtitle</label
 				>
@@ -304,40 +312,29 @@
 			<Textarea id="edit-desc" bind:value={editForm.description} rows={3} required />
 		</div>
 
-		<div class="grid grid-cols-3 gap-3">
-			<div class="space-y-1.5">
+		<div class="space-y-1.5">
+			<div class="min-w-0 space-y-1.5">
 				<label
 					for="edit-category"
 					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Kategori</label
 				>
-				<select
+				<CategorySelect
 					id="edit-category"
 					bind:value={editForm.category_id}
+					{categories}
+					showType
 					required
-					class="w-full rounded-xl border border-slate-250 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
-				>
-					<option value={0} disabled>Pilih Kategori</option>
-					{#each categories as category (category.id)}
-						<option value={category.id}>{category.name}</option>
-					{/each}
-				</select>
-			</div>
-			<div class="space-y-1.5">
-				<label for="edit-loc" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-					>Loc. ID</label
-				>
-				<Input type="number" id="edit-loc" bind:value={editForm.location_id} required />
-			</div>
-			<div class="space-y-1.5">
-				<label for="edit-med" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-					>Media ID</label
-				>
-				<Input type="number" id="edit-med" bind:value={editForm.media_id} required />
+				/>
+				{#if categoriesQuery.isError}
+					<p class="text-[11px] font-semibold text-red-600">Gagal memuat kategori.</p>
+				{:else if categories.length === 0}
+					<p class="text-[11px] font-semibold text-slate-400">Belum ada kategori.</p>
+				{/if}
 			</div>
 		</div>
 
-		<div class="grid grid-cols-2 gap-4">
-			<div class="space-y-1.5">
+		<div class="grid gap-4 md:grid-cols-2">
+			<div class="min-w-0 space-y-1.5">
 				<label
 					for="edit-owner"
 					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
@@ -345,24 +342,26 @@
 				>
 				<Input id="edit-owner" bind:value={editForm.owner_name} required />
 			</div>
-			<div class="space-y-1.5">
+			<div class="min-w-0 space-y-1.5">
 				<label
 					for="edit-msisdn"
 					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
 					>No. Kontak (MSISDN)</label
 				>
-				<Input id="edit-msisdn" bind:value={editForm.owner_msisdn} required />
+				<Input id="edit-msisdn" bind:value={editForm.owner_msisdn} />
 			</div>
 		</div>
 
-		{#if !editingItem}
-			<div class="space-y-1.5">
-				<label for="edit-by" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-					>Uploader ID</label
-				>
-				<Input type="number" id="edit-by" bind:value={editForm.uploaded_by} required />
-			</div>
-		{/if}
+		<div class="space-y-1.5">
+			<label class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+				>Gambar Potensi</label
+			>
+			<ImageUploader
+				bind:value={editForm.media_id}
+				aspectRatio={4 / 3}
+				placeholder="Pilih gambar potensi"
+			/>
+		</div>
 
 		<div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 shrink-0">
 			<Button variant="outline" onclick={() => (isDialogOpen = false)}>Batal</Button>

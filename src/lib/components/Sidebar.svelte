@@ -2,7 +2,6 @@
 	import { page } from '$app/state';
 	import { fade } from 'svelte/transition';
 	import {
-		LayoutDashboard,
 		Sliders,
 		FolderOpen,
 		Newspaper,
@@ -10,31 +9,31 @@
 		Store,
 		X,
 		LogOut,
-		Compass
+		Compass,
+		FileImage,
+		MapPinned,
+		Images,
+		Contact,
+		Landmark
 	} from '@lucide/svelte';
 
 	let { isOpen = $bindable(false) } = $props();
 
-	const menuItems = [
+	const mainMenuItems = [
 		{
 			name: 'Dashboard',
-			href: '/dashboard',
-			icon: LayoutDashboard
-		},
-		{
-			name: 'Atur Dashboard',
 			href: '/dashboard/manage',
 			icon: Sliders
 		},
 		{
-			name: 'Kategori',
-			href: '/category',
-			icon: FolderOpen
+			name: 'Profil',
+			href: '/profile',
+			icon: Landmark
 		},
 		{
-			name: 'Berita',
-			href: '/news',
-			icon: Newspaper
+			name: 'Peta',
+			href: '/map',
+			icon: MapPinned
 		},
 		{
 			name: 'Potensi Desa',
@@ -42,9 +41,37 @@
 			icon: Sparkles
 		},
 		{
+			name: 'Galeri',
+			href: '/gallery',
+			icon: Images
+		},
+		{
+			name: 'Berita',
+			href: '/news',
+			icon: Newspaper
+		},
+		{
+			name: 'Kontak',
+			href: '/contact',
+			icon: Contact
+		}
+	];
+
+	const adminMenuItems = [
+		{
+			name: 'Kategori',
+			href: '/category',
+			icon: FolderOpen
+		},
+		{
 			name: 'Bisnis & UMKM',
 			href: '/business',
 			icon: Store
+		},
+		{
+			name: 'Base64 Formatter',
+			href: '/dashboard/base64',
+			icon: FileImage
 		}
 	];
 
@@ -104,7 +131,44 @@
 			<p class="text-[10px] font-bold tracking-widest text-sage-400 uppercase">Menu Utama</p>
 		</div>
 
-		{#each menuItems as item (item.href)}
+		{#each mainMenuItems as item (item.href)}
+			{@const Icon = item.icon}
+			<a
+				href={item.href}
+				onclick={() => (isOpen = false)}
+				class="group flex items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-semibold tracking-wide transition-all duration-200 relative overflow-hidden
+				{isActive(item.href)
+					? 'bg-white/10 text-indigo-500 border-l-4 border-indigo-500 font-bold'
+					: 'text-sage-200/80 hover:bg-white/5 hover:text-white border-l-4 border-transparent'}"
+			>
+				<span
+					class="transition-transform group-hover:scale-105 duration-200 text-sage-400 group-hover:text-indigo-500 {isActive(
+						item.href
+					)
+						? 'text-indigo-500'
+						: ''}"
+				>
+					<Icon size={20} strokeWidth={2.5} />
+				</span>
+
+				<span>{item.name}</span>
+
+				{#if isActive(item.href)}
+					<span
+						class="absolute right-4 h-1.5 w-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(141,117,87,0.6)]"
+						in:fade={{ duration: 150 }}
+					></span>
+				{/if}
+			</a>
+		{/each}
+
+		<div class="px-3 mt-6 mb-2">
+			<p class="text-[10px] font-bold tracking-widest text-sage-400 uppercase">
+				Pengaturan & Fitur
+			</p>
+		</div>
+
+		{#each adminMenuItems as item (item.href)}
 			{@const Icon = item.icon}
 			<a
 				href={item.href}

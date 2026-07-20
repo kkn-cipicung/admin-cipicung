@@ -12,6 +12,7 @@ import type {
 	ListNewsResponse,
 	FindNewsResponse,
 	FindNewsByDateResponse,
+	NewsHeaderResponse,
 	UpdateNewsResponse,
 	DeleteNewsResponse
 } from '../_model/response';
@@ -35,6 +36,11 @@ export const findNewsByDate = async (
 	payload: FindNewsByDatePayload
 ): Promise<FindNewsByDateResponse> => {
 	const { data } = await api.post<FindNewsByDateResponse>('/news/find-by-date', payload);
+	return data;
+};
+
+export const getNewsHeader = async (payload: FindNewsPayload): Promise<NewsHeaderResponse> => {
+	const { data } = await api.post<NewsHeaderResponse>('/news/header', payload);
 	return data;
 };
 

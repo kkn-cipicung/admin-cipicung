@@ -1,6 +1,12 @@
 <script lang="ts">
 	import type { DashboardData } from '../_model/response';
-	import { listDashboards, createDashboard, updateDashboard, deleteDashboard } from '../_request';
+	import {
+		listDashboards,
+		createDashboard,
+		updateDashboard,
+		deleteDashboard,
+		activateDashboard
+	} from '../_request';
 	import { listCategories } from '../../category/_request';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import {
@@ -15,7 +21,10 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
-	import { Plus, Search, Loader2, Pencil, Trash2 } from '@lucide/svelte';
+	import ImageUploader from '$lib/components/ui/ImageUploader.svelte';
+	import CategorySelect from '$lib/components/ui/CategorySelect.svelte';
+	import MediaThumbnail from '$lib/components/ui/MediaThumbnail.svelte';
+	import { Plus, Search, Loader2, Pencil, Trash2, CircleCheck, CircleX } from '@lucide/svelte';
 
 	const queryClient = useQueryClient();
 	const dashboardsQuery = createQuery(() => ({
@@ -23,22 +32,36 @@
 		queryFn: () => listDashboards()
 	}));
 	const categoriesQuery = createQuery(() => ({
-		queryKey: ['categories', 'list'],
+		queryKey: ['categories', 'list', 'dashboard'],
 		queryFn: () => listCategories()
 	}));
 
 	let dashboardItems = $derived(dashboardsQuery.data?.data || []);
-	let categories = $derived(categoriesQuery.data?.data || []);
+	let categories = $derived(
+		(categoriesQuery.data?.data || []).filter((category) => category.type === 'dashboard')
+	);
 	let isLoading = $derived(dashboardsQuery.isPending || categoriesQuery.isPending);
 
 	let isDialogOpen = $state(false);
 	let editingItem = $state<DashboardData | null>(null);
+	let activatingId = $state<number | null>(null);
+	let searchQuery = $state('');
 	let editForm = $state({
 		title: '',
 		description: '',
 		category_id: 1,
-		created_by: 101
+		media_id: ''
 	});
+	let filteredDashboardItems = $derived(
+		dashboardItems.filter((item) => {
+			const query = searchQuery.toLowerCase();
+			return searchQuery
+				? item.title.toLowerCase().includes(query) ||
+						item.description.toLowerCase().includes(query) ||
+						item.category.name.toLowerCase().includes(query)
+				: true;
+		})
+	);
 
 	function handleCreate() {
 		editingItem = null;
@@ -46,7 +69,7 @@
 			title: '',
 			description: '',
 			category_id: categories.length > 0 ? categories[0].id : 1,
-			created_by: 101
+			media_id: ''
 		};
 		isDialogOpen = true;
 	}
@@ -61,8 +84,8 @@
 		editForm = {
 			title: item.title,
 			description: item.description,
-			category_id: item.category_id,
-			created_by: item.created_by
+			category_id: item.category.id,
+			media_id: ''
 		};
 		isDialogOpen = true;
 	}
@@ -75,13 +98,16 @@
 					id: editingItem.id,
 					category_id: Number(editForm.category_id),
 					title: editForm.title,
-					description: editForm.description
+					description: editForm.description,
+					media_id: editForm.media_id.trim() || null,
+					is_active: editingItem.is_active
 				});
 			} else {
 				await createDashboard({
 					category_id: Number(editForm.category_id),
 					title: editForm.title,
-					description: editForm.description
+					description: editForm.description,
+					media_id: editForm.media_id.trim() || null
 				});
 			}
 			isDialogOpen = false;
@@ -100,6 +126,20 @@
 			} catch (error) {
 				console.error('Failed to delete dashboard item:', error);
 			}
+		}
+	}
+
+	async function handleActivate(id: number) {
+		if (activatingId !== null) return;
+
+		activatingId = id;
+		try {
+			await activateDashboard({ id });
+			await queryClient.invalidateQueries({ queryKey: ['dashboards', 'list'] });
+		} catch (error) {
+			console.error('Failed to activate dashboard item:', error);
+		} finally {
+			activatingId = null;
 		}
 	}
 
@@ -132,7 +172,11 @@
 			<span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
 				<Search size={16} />
 			</span>
-			<Input placeholder="Cari konten dashboard..." class="pl-9 bg-slate-50/50" />
+			<Input
+				placeholder="Cari konten dashboard..."
+				class="pl-9 bg-slate-50/50"
+				bind:value={searchQuery}
+			/>
 		</div>
 	</div>
 
@@ -148,6 +192,7 @@
 			<TableHeader>
 				<TableRow>
 					<TableHead class="w-16 text-center">No</TableHead>
+					<TableHead class="w-24 text-center">Gambar</TableHead>
 					<TableHead>Judul Konten</TableHead>
 					<TableHead>Deskripsi Slide</TableHead>
 					<TableHead class="text-center">Kategori</TableHead>
@@ -157,16 +202,19 @@
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#if dashboardItems.length === 0}
+				{#if filteredDashboardItems.length === 0}
 					<TableRow>
-						<TableCell colspan={7} class="text-center py-8 text-slate-400 font-medium">
+						<TableCell colspan={8} class="text-center py-8 text-slate-400 font-medium">
 							Belum ada data slide dashboard.
 						</TableCell>
 					</TableRow>
 				{:else}
-					{#each dashboardItems as item, index (item.id)}
+					{#each filteredDashboardItems as item, index (item.id)}
 						<TableRow>
 							<TableCell class="text-center font-bold text-slate-400">{index + 1}</TableCell>
+							<TableCell class="text-center">
+								<MediaThumbnail media={item.media_id} alt={item.title} />
+							</TableCell>
 							<TableCell class="font-bold text-slate-900">{item.title}</TableCell>
 							<TableCell class="max-w-sm text-xs text-slate-500 line-clamp-1 py-5"
 								>{item.description}</TableCell
@@ -175,14 +223,14 @@
 								<span
 									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-slate-100 text-xs font-bold text-slate-650"
 								>
-									{item.category_name || getCategoryName(item.category_id)}
+									{item.category.name || getCategoryName(item.category.id)}
 								</span>
 							</TableCell>
 							<TableCell class="text-center">
 								<span
 									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-blue-50 text-xs font-bold text-blue-700"
 								>
-									{item.creator_name || '#' + item.created_by}
+									{item.creator.name || '#' + item.creator.id}
 								</span>
 							</TableCell>
 							<TableCell class="text-xs text-slate-500 whitespace-nowrap"
@@ -190,6 +238,29 @@
 							>
 							<TableCell class="text-right">
 								<div class="flex items-center justify-end gap-2">
+									<Button
+										size="sm"
+										class={item.is_active
+											? 'bg-emerald-600 text-white hover:bg-emerald-600 shadow-none'
+											: 'bg-red-600 text-white hover:bg-red-700 shadow-none'}
+										title={item.is_active
+											? 'Konten sedang aktif'
+											: 'Klik untuk mengaktifkan konten'}
+										aria-disabled={item.is_active}
+										disabled={activatingId !== null}
+										onclick={() => !item.is_active && handleActivate(item.id)}
+									>
+										{#if activatingId === item.id}
+											<Loader2 size={14} class="animate-spin" />
+											Mengaktifkan...
+										{:else if item.is_active}
+											<CircleCheck size={14} />
+											Aktif
+										{:else}
+											<CircleX size={14} />
+											Nonaktif
+										{/if}
+									</Button>
 									<Button
 										variant="outline"
 										size="icon"
@@ -245,27 +316,24 @@
 					for="edit-category"
 					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Kategori</label
 				>
-				<select
+				<CategorySelect
 					id="edit-category"
 					bind:value={editForm.category_id}
+					{categories}
 					required
-					class="w-full rounded-xl border border-slate-250 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
-				>
-					<option value={0} disabled>Pilih Kategori</option>
-					{#each categories as category (category.id)}
-						<option value={category.id}>{category.name} ({category.type})</option>
-					{/each}
-				</select>
+				/>
 			</div>
-			{#if !editingItem}
-				<div class="space-y-1.5">
-					<label
-						for="edit-by"
-						class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Editor ID</label
-					>
-					<Input type="number" id="edit-by" bind:value={editForm.created_by} required />
-				</div>
-			{/if}
+		</div>
+
+		<div class="space-y-1.5">
+			<label class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+				>Gambar Slide</label
+			>
+			<ImageUploader
+				bind:value={editForm.media_id}
+				aspectRatio={16 / 9}
+				placeholder="Pilih gambar slide dashboard"
+			/>
 		</div>
 
 		<div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">

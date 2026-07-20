@@ -5,7 +5,7 @@ export const CreateDashboardPayloadSchema = z.object({
 	category_id: z.number(),
 	title: z.string(),
 	description: z.string(),
-	img_id: z.string().optional()
+	media_id: z.string().nullable().optional()
 });
 export type CreateDashboardPayload = z.infer<typeof CreateDashboardPayloadSchema>;
 
@@ -22,7 +22,8 @@ export const UpdateDashboardPayloadSchema = z.object({
 	category_id: z.number(),
 	title: z.string(),
 	description: z.string(),
-	img_id: z.string().optional()
+	media_id: z.string().nullable().optional(),
+	is_active: z.boolean().optional()
 });
 export type UpdateDashboardPayload = z.infer<typeof UpdateDashboardPayloadSchema>;
 
@@ -30,3 +31,8 @@ export const DeleteDashboardPayloadSchema = z.object({
 	id: z.number()
 });
 export type DeleteDashboardPayload = z.infer<typeof DeleteDashboardPayloadSchema>;
+
+export const ActivateDashboardPayloadSchema = z.object({
+	id: z.number()
+});
+export type ActivateDashboardPayload = z.infer<typeof ActivateDashboardPayloadSchema>;

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { CategoryData } from '../_model/response';
+	import type { CategoryType } from '../_model/payload';
 	import { listCategories, createCategory, updateCategory, deleteCategory } from '../_request';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import {
@@ -26,13 +27,23 @@
 
 	let isDialogOpen = $state(false);
 	let editingItem = $state<CategoryData | null>(null);
+	let searchQuery = $state('');
 	let editForm = $state({
 		name: '',
-		type: 'news' as 'news' | 'document' | 'business' | 'potential'
+		type: 'news' as CategoryType
 	});
+	let filteredCategories = $derived(
+		categories.filter((category) => {
+			const query = searchQuery.toLowerCase();
+			return searchQuery
+				? category.name.toLowerCase().includes(query) ||
+						category.type.toLowerCase().includes(query) ||
+						category.slug.toLowerCase().includes(query)
+				: true;
+		})
+	);
 
 	const handleCreate = () => {
-		console.log('handleCreate called');
 		editingItem = null;
 		editForm = {
 			name: '',
@@ -42,7 +53,6 @@
 	};
 
 	const handleEdit = (item: CategoryData) => {
-		console.log('handleEdit called for item:', item);
 		editingItem = item;
 		editForm = {
 			name: item.name,
@@ -53,23 +63,18 @@
 
 	const handleSave = async (e: Event) => {
 		e.preventDefault();
-		console.log('handleSave submit event triggered', editForm);
 		try {
 			if (editingItem) {
-				console.log('Updating category:', editingItem.id, editForm);
-				const res = await updateCategory({
+				await updateCategory({
 					id: editingItem.id,
 					name: editForm.name,
 					type: editForm.type
 				});
-				console.log('Update category response:', res);
 			} else {
-				console.log('Creating category:', editForm);
-				const res = await createCategory({
+				await createCategory({
 					name: editForm.name,
 					type: editForm.type
 				});
-				console.log('Create category response:', res);
 			}
 			isDialogOpen = false;
 			editingItem = null;
@@ -118,7 +123,7 @@
 			<span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
 				<Search size={16} />
 			</span>
-			<Input placeholder="Cari kategori..." class="pl-9 bg-slate-50/50" />
+			<Input placeholder="Cari kategori..." class="pl-9 bg-slate-50/50" bind:value={searchQuery} />
 		</div>
 	</div>
 
@@ -141,14 +146,14 @@
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{#if categories.length === 0}
+				{#if filteredCategories.length === 0}
 					<TableRow>
 						<TableCell colspan={5} class="text-center py-8 text-slate-400 font-medium">
 							Belum ada data kategori.
 						</TableCell>
 					</TableRow>
 				{:else}
-					{#each categories as category, index (category.id)}
+					{#each filteredCategories as category, index (category.id)}
 						<TableRow>
 							<TableCell class="text-center font-bold text-slate-400">{index + 1}</TableCell>
 							<TableCell class="font-bold text-slate-900">{category.name}</TableCell>
@@ -156,7 +161,8 @@
 								<span
 									class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-bold ring-1 ring-inset
 									{category.type === 'news' ? 'bg-blue-50 text-blue-700 ring-blue-700/10' : ''}
-									{category.type === 'document' ? 'bg-slate-50 text-slate-700 ring-slate-750/10' : ''}
+									{category.type === 'dashboard' ? 'bg-emerald-50 text-emerald-700 ring-emerald-700/10' : ''}
+									{category.type === 'gallery' ? 'bg-rose-50 text-rose-700 ring-rose-700/10' : ''}
 									{category.type === 'business' ? 'bg-amber-50 text-amber-700 ring-amber-700/10' : ''}
 									{category.type === 'potential' ? 'bg-purple-50 text-purple-700 ring-purple-700/10' : ''}
 								"
@@ -222,7 +228,8 @@
 				class="w-full rounded-xl border border-slate-250 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
 			>
 				<option value="news">news (Berita)</option>
-				<option value="document">document (Dokumen)</option>
+				<option value="dashboard">dashboard (Dashboard)</option>
+				<option value="gallery">gallery (Galeri)</option>
 				<option value="business">business (Bisnis/UMKM)</option>
 				<option value="potential">potential (Potensi Desa)</option>
 			</select>

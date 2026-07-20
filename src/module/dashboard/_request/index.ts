@@ -4,14 +4,16 @@ import type {
 	ListDashboardPayload,
 	FindDashboardPayload,
 	UpdateDashboardPayload,
-	DeleteDashboardPayload
+	DeleteDashboardPayload,
+	ActivateDashboardPayload
 } from '../_model/payload';
 import type {
 	CreateDashboardResponse,
 	ListDashboardResponse,
 	FindDashboardResponse,
 	UpdateDashboardResponse,
-	DeleteDashboardResponse
+	DeleteDashboardResponse,
+	ActivateDashboardResponse
 } from '../_model/response';
 
 export const createDashboard = async (
@@ -29,9 +31,14 @@ export const listDashboards = async (
 };
 
 export const findDashboardById = async (
-	payload: FindDashboardPayload
+	payload?: FindDashboardPayload
 ): Promise<FindDashboardResponse> => {
-	const { data } = await api.post<FindDashboardResponse>('/dashboard/detail', payload);
+	const { data } = await api.post<FindDashboardResponse>('/dashboard/detail', payload || {});
+	return data;
+};
+
+export const getActiveDashboard = async (): Promise<FindDashboardResponse> => {
+	const { data } = await api.post<FindDashboardResponse>('/dashboard/active', {});
 	return data;
 };
 
@@ -46,5 +53,12 @@ export const deleteDashboard = async (
 	payload: DeleteDashboardPayload
 ): Promise<DeleteDashboardResponse> => {
 	const { data } = await api.post<DeleteDashboardResponse>('/dashboard/delete', payload);
+	return data;
+};
+
+export const activateDashboard = async (
+	payload: ActivateDashboardPayload
+): Promise<ActivateDashboardResponse> => {
+	const { data } = await api.post<ActivateDashboardResponse>('/dashboard/activate', payload);
 	return data;
 };

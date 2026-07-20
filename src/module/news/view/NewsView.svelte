@@ -15,7 +15,10 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import CategorySelect from '$lib/components/ui/CategorySelect.svelte';
 	import { Plus, Search, Loader2, Pencil, Trash2 } from '@lucide/svelte';
+	import ImageUploader from '$lib/components/ui/ImageUploader.svelte';
+	import MediaThumbnail from '$lib/components/ui/MediaThumbnail.svelte';
 
 	const queryClient = useQueryClient();
 	const articlesQuery = createQuery(() => ({
@@ -39,13 +42,13 @@
 		title: '',
 		description: '',
 		category_id: 0,
-		uploaded_by: 101
+		media_id: ''
 	});
 
 	let filteredArticles = $derived(
 		articles.filter((article) => {
 			const matchesCategory = selectedCategoryId
-				? article.category_id === Number(selectedCategoryId)
+				? article.category.id === Number(selectedCategoryId)
 				: true;
 			const matchesSearch = searchQuery
 				? article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -63,7 +66,7 @@
 			title: '',
 			description: '',
 			category_id: categories.length > 0 ? categories[0].id : 0,
-			uploaded_by: 101
+			media_id: ''
 		};
 		isDialogOpen = true;
 	};
@@ -73,8 +76,8 @@
 		editForm = {
 			title: item.title,
 			description: item.description,
-			category_id: item.category_id,
-			uploaded_by: item.uploaded_by
+			category_id: item.category.id,
+			media_id: ''
 		};
 		isDialogOpen = true;
 	};
@@ -87,14 +90,15 @@
 					id: editingItem.id,
 					title: editForm.title,
 					description: editForm.description,
-					category_id: Number(editForm.category_id)
+					category_id: Number(editForm.category_id),
+					media_id: editForm.media_id.trim() || null
 				});
 			} else {
 				await createNews({
 					title: editForm.title,
 					description: editForm.description,
 					category_id: Number(editForm.category_id),
-					uploaded_by: Number(editForm.uploaded_by)
+					media_id: editForm.media_id.trim() || null
 				});
 			}
 			isDialogOpen = false;
@@ -159,15 +163,12 @@
 		</div>
 
 		<div class="flex items-center gap-3">
-			<select
+			<CategorySelect
 				bind:value={selectedCategoryId}
-				class="rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-semibold text-slate-600 outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 transition-all"
-			>
-				<option value="">Semua Kategori</option>
-				{#each categories as category (category.id)}
-					<option value={category.id}>{category.name}</option>
-				{/each}
-			</select>
+				{categories}
+				allLabel="Semua Kategori"
+				class="bg-slate-50/50"
+			/>
 		</div>
 	</div>
 
@@ -183,6 +184,7 @@
 			<TableHeader>
 				<TableRow>
 					<TableHead class="w-16 text-center">No</TableHead>
+					<TableHead class="w-24 text-center">Gambar</TableHead>
 					<TableHead>Judul Konten</TableHead>
 					<TableHead>Ringkasan Deskripsi</TableHead>
 					<TableHead class="text-center">Kategori</TableHead>
@@ -194,7 +196,7 @@
 			<TableBody>
 				{#if filteredArticles.length === 0}
 					<TableRow>
-						<TableCell colspan={7} class="text-center py-8 text-slate-400 font-medium">
+						<TableCell colspan={8} class="text-center py-8 text-slate-400 font-medium">
 							Belum ada data berita.
 						</TableCell>
 					</TableRow>
@@ -202,6 +204,9 @@
 					{#each filteredArticles as article, index (article.id)}
 						<TableRow>
 							<TableCell class="text-center font-bold text-slate-400">{index + 1}</TableCell>
+							<TableCell class="text-center">
+								<MediaThumbnail media={article.media_id} alt={article.title} />
+							</TableCell>
 							<TableCell class="font-bold text-slate-900 max-w-xs truncate"
 								>{article.title}</TableCell
 							>
@@ -212,14 +217,14 @@
 								<span
 									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-slate-100 text-xs font-bold text-slate-650"
 								>
-									{article.category_name || getCategoryName(article.category_id)}
+									{article.category.name || getCategoryName(article.category.id)}
 								</span>
 							</TableCell>
 							<TableCell class="text-center">
 								<span
 									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-blue-50 text-xs font-bold text-blue-700"
 								>
-									{article.uploader_name || '#' + article.uploaded_by}
+									{article.uploader.name || '#' + article.uploader.id}
 								</span>
 							</TableCell>
 							<TableCell class="text-xs text-slate-500 whitespace-nowrap"
@@ -281,27 +286,16 @@
 				<label for="edit-cat" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
 					>Kategori</label
 				>
-				<select
-					id="edit-cat"
-					bind:value={editForm.category_id}
-					required
-					class="w-full rounded-xl border border-slate-250 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
-				>
-					<option value={0} disabled>Pilih Kategori</option>
-					{#each categories as category (category.id)}
-						<option value={category.id}>{category.name}</option>
-					{/each}
-				</select>
+				<CategorySelect id="edit-cat" bind:value={editForm.category_id} {categories} required />
 			</div>
-			{#if !editingItem}
-				<div class="space-y-1.5">
-					<label
-						for="edit-by"
-						class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Editor ID</label
-					>
-					<Input type="number" id="edit-by" bind:value={editForm.uploaded_by} required />
-				</div>
-			{/if}
+		</div>
+
+		<div>
+			<ImageUploader
+				bind:value={editForm.media_id}
+				aspectRatio={16 / 9}
+				placeholder="Pilih gambar berita"
+			/>
 		</div>
 
 		<div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">

@@ -15,6 +15,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import CategorySelect from '$lib/components/ui/CategorySelect.svelte';
 	import { Loader2, Pencil, Phone, Plus, Search, Trash2 } from '@lucide/svelte';
 
 	const queryClient = useQueryClient();
@@ -24,7 +25,7 @@
 	}));
 	const categoriesQuery = createQuery(() => ({
 		queryKey: ['categories', 'list', 'business'],
-		queryFn: () => listCategories({ type: 'business' })
+		queryFn: () => listCategories()
 	}));
 
 	let businesses = $derived(businessesQuery.data?.data || []);
@@ -58,7 +59,7 @@
 					business.address.toLowerCase().includes(query)
 				: true;
 			const matchesCategory = selectedCategoryId
-				? business.category_id === Number(selectedCategoryId)
+				? business.category.id === Number(selectedCategoryId)
 				: true;
 
 			return matchesSearch && matchesCategory;
@@ -87,7 +88,7 @@
 	function handleEdit(item: BusinessData) {
 		editingItem = item;
 		editForm = {
-			category_id: item.category_id,
+			category_id: item.category.id,
 			owner_name: item.owner_name,
 			business_name: item.business_name,
 			description: item.description,
@@ -194,15 +195,12 @@
 			/>
 		</div>
 
-		<select
+		<CategorySelect
 			bind:value={selectedCategoryId}
-			class="rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs font-semibold text-slate-600 outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 transition-all"
-		>
-			<option value="">Semua Kategori</option>
-			{#each categories as category (category.id)}
-				<option value={category.id}>{category.name}</option>
-			{/each}
-		</select>
+			{categories}
+			allLabel="Semua Kategori"
+			class="bg-slate-50/50 md:w-56"
+		/>
 	</div>
 
 	{#if isLoading}
@@ -260,7 +258,7 @@
 								<span
 									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-amber-50 text-xs font-bold text-amber-700"
 								>
-									{business.category_name || getCategoryName(business.category_id)}
+									{business.category.name || getCategoryName(business.category.id)}
 								</span>
 							</TableCell>
 							<TableCell class="text-xs">
@@ -331,17 +329,12 @@
 					for="edit-category"
 					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Kategori</label
 				>
-				<select
+				<CategorySelect
 					id="edit-category"
 					bind:value={editForm.category_id}
+					{categories}
 					required
-					class="w-full rounded-xl border border-slate-250 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
-				>
-					<option value={0} disabled>Pilih Kategori</option>
-					{#each categories as category (category.id)}
-						<option value={category.id}>{category.name}</option>
-					{/each}
-				</select>
+				/>
 			</div>
 			<div class="space-y-1.5">
 				<label

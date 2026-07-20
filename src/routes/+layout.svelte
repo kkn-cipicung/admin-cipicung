@@ -16,11 +16,16 @@
 
 	const pageTitles: Record<string, string> = {
 		'/dashboard/manage': 'Pengaturan Dashboard Client',
+		'/dashboard/base64': 'Format Base64 & Gambar',
 		'/dashboard': 'Ringkasan Dashboard',
 		'/category': 'Manajemen Kategori',
 		'/news': 'Kelola Berita & Informasi',
 		'/potential': 'Potensi & UMKM Desa',
-		'/business': 'Bisnis & UMKM Desa'
+		'/business': 'Bisnis & UMKM Desa',
+		'/gallery': 'Galeri Desa',
+		'/map': 'Peta Desa',
+		'/profile': 'Profil Desa',
+		'/contact': 'Kontak Desa'
 	};
 
 	function getPageTitle(pathname: string) {

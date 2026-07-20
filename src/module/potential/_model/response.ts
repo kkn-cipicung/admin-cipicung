@@ -3,16 +3,14 @@ import { BaseResponseSchema } from '../../../utils/types';
 
 export const PotentialDataSchema = z.object({
 	id: z.number(),
-	category_id: z.number(),
-	category_name: z.string().optional(),
+	category: z.object({ id: z.number(), name: z.string() }),
 	title: z.string(),
-	subtitle: z.string(),
+	subtitle: z.string().nullable(),
 	slug: z.string(),
 	description: z.string(),
-	location_id: z.number(),
-	owner_name: z.string(),
-	owner_msisdn: z.string(),
-	media_id: z.number(),
+	location: z.object({ id: z.number() }),
+	owner: z.object({ name: z.string(), msisdn: z.string().nullable() }),
+	media_id: z.number().nullable(),
 	created_at: z.string()
 });
 export type PotentialData = z.infer<typeof PotentialDataSchema>;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { PaginationParamsSchema } from '../../../utils/types';
 
-export const CategoryTypeSchema = z.enum(['news', 'document', 'business', 'potential']);
+export const CategoryTypeSchema = z.enum(['dashboard', 'gallery', 'news', 'business', 'potential']);
 export type CategoryType = z.infer<typeof CategoryTypeSchema>;
 
 export const CreateCategoryPayloadSchema = z.object({
@@ -10,9 +10,7 @@ export const CreateCategoryPayloadSchema = z.object({
 });
 export type CreateCategoryPayload = z.infer<typeof CreateCategoryPayloadSchema>;
 
-export const ListCategoryPayloadSchema = PaginationParamsSchema.extend({
-	type: CategoryTypeSchema.optional()
-});
+export const ListCategoryPayloadSchema = PaginationParamsSchema;
 export type ListCategoryPayload = z.infer<typeof ListCategoryPayloadSchema>;
 
 export const FindCategoryPayloadSchema = z.object({

@@ -3,8 +3,7 @@ import { BaseResponseSchema } from '../../../utils/types';
 
 export const BusinessDataSchema = z.object({
 	id: z.number(),
-	category_id: z.number(),
-	category_name: z.string().optional(),
+	category: z.object({ id: z.number(), name: z.string() }),
 	owner_name: z.string(),
 	business_name: z.string(),
 	description: z.string(),
@@ -12,7 +11,7 @@ export const BusinessDataSchema = z.object({
 	address: z.string(),
 	instagram: z.string().nullable().optional(),
 	facebook: z.string().nullable().optional(),
-	created_at: z.string().optional()
+	created_at: z.string()
 });
 export type BusinessData = z.infer<typeof BusinessDataSchema>;
 
