@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createMap, getMapDetail, updateMap } from '../_request';
+	import { createMap, updateMap, getActiveMap } from '../_request';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
@@ -8,8 +8,8 @@
 
 	const queryClient = useQueryClient();
 	const mapQuery = createQuery(() => ({
-		queryKey: ['map', 'detail'],
-		queryFn: getMapDetail,
+		queryKey: ['map', 'active'],
+		queryFn: getActiveMap,
 		retry: false
 	}));
 	let form = $state({ elevation: '', coordinate: '', hamlet_one: '', hamlet_two: '' });
@@ -22,8 +22,8 @@
 			form = {
 				elevation: data.elevation,
 				coordinate: data.coordinate,
-				hamlet_one: data.hamlet_one,
-				hamlet_two: data.hamlet_two
+				hamlet_one: String(data.hamlet_one),
+				hamlet_two: String(data.hamlet_two)
 			};
 			hasHydrated = true;
 		}
@@ -32,10 +32,15 @@
 	async function save(event: Event) {
 		event.preventDefault();
 		isSaving = true;
+		const payload = {
+			...form,
+			hamlet_one: Number(form.hamlet_one),
+			hamlet_two: Number(form.hamlet_two)
+		};
 		try {
-			if (hasHydrated) await updateMap(form);
-			else await createMap(form);
-			await queryClient.invalidateQueries({ queryKey: ['map', 'detail'] });
+			if (hasHydrated) await updateMap(payload);
+			else await createMap(payload);
+			await queryClient.invalidateQueries({ queryKey: ['map', 'active'] });
 			toast.success('Data peta berhasil disimpan!');
 		} catch (error) {
 			const err = error as { apiResponse?: { message?: string }; message?: string };
@@ -64,8 +69,8 @@
 	{/if}
 	<Input bind:value={form.elevation} placeholder="Elevasi" required />
 	<Input bind:value={form.coordinate} placeholder="Koordinat" required />
-	<Input bind:value={form.hamlet_one} placeholder="Dusun 1" required />
-	<Input bind:value={form.hamlet_two} placeholder="Dusun 2" required />
+	<Input type="number" bind:value={form.hamlet_one} placeholder="Dusun 1" required />
+	<Input type="number" bind:value={form.hamlet_two} placeholder="Dusun 2" required />
 	<div class="flex justify-end">
 		<Button type="submit" disabled={isSaving}>{isSaving ? 'Menyimpan...' : 'Simpan Peta'}</Button>
 	</div>

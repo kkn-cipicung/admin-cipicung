@@ -4,8 +4,8 @@ import type { EmptyMapResponse, MapResponse } from '../_model/response';
 
 export const createMap = async (payload: CreateMapPayload): Promise<EmptyMapResponse> =>
 	(await api.post<EmptyMapResponse>('/map/create', payload)).data;
-export const getMapDetail = async (): Promise<MapResponse> =>
-	(await api.post<MapResponse>('/map/detail', {})).data;
+// export const getMapDetail = async (): Promise<MapResponse> =>
+// 	(await api.post<MapResponse>('/map/detail', {})).data;
 export const getActiveMap = async (): Promise<MapResponse> =>
 	(await api.post<MapResponse>('/map/active', {})).data;
 export const updateMap = async (payload: UpdateMapPayload): Promise<EmptyMapResponse> =>

@@ -5,8 +5,8 @@ export const MapDataSchema = z.object({
 	id: z.number().optional(),
 	elevation: z.string(),
 	coordinate: z.string(),
-	hamlet_one: z.string(),
-	hamlet_two: z.string(),
+	hamlet_one: z.number(),
+	hamlet_two: z.number(),
 	is_active: z.boolean().optional()
 });
 export type MapData = z.infer<typeof MapDataSchema>;
