@@ -25,6 +25,7 @@
 		TableRow
 	} from '$lib/components/ui/table';
 	import { Loader2, Pencil, Plus, Search, Trash2 } from '@lucide/svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	const queryClient = useQueryClient();
 	const galleriesQuery = createQuery(() => ({
@@ -83,16 +84,30 @@
 			category_id: Number(form.category_id),
 			media_id: form.media_id.trim() || null
 		};
-		if (editingItem) await updateGallery({ id: editingItem.id, ...payload });
-		else await createGallery(payload);
-		isDialogOpen = false;
-		await queryClient.invalidateQueries({ queryKey: ['galleries', 'list'] });
+		try {
+			if (editingItem) await updateGallery({ id: editingItem.id, ...payload });
+			else await createGallery(payload);
+			isDialogOpen = false;
+			await queryClient.invalidateQueries({ queryKey: ['galleries', 'list'] });
+			toast.success('Galeri berhasil disimpan!');
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan galeri', message: msg });
+		}
 	}
 
 	async function remove(id: number) {
 		if (!confirm('Apakah Anda yakin ingin menghapus galeri ini?')) return;
-		await deleteGallery({ id });
-		await queryClient.invalidateQueries({ queryKey: ['galleries', 'list'] });
+		try {
+			await deleteGallery({ id });
+			await queryClient.invalidateQueries({ queryKey: ['galleries', 'list'] });
+			toast.success('Galeri berhasil dihapus.');
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menghapus galeri', message: msg });
+		}
 	}
 </script>
 

@@ -19,6 +19,7 @@
 	import CategorySelect from '$lib/components/ui/CategorySelect.svelte';
 	import MediaThumbnail from '$lib/components/ui/MediaThumbnail.svelte';
 	import { Plus, Search, Loader2, Pencil, Trash2 } from '@lucide/svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	const queryClient = useQueryClient();
 	const potentialsQuery = createQuery(() => ({
@@ -135,8 +136,11 @@
 			isDialogOpen = false;
 			editingItem = null;
 			await queryClient.invalidateQueries({ queryKey: ['potentials', 'list'] });
+			toast.success('Potensi berhasil disimpan!');
 		} catch (error) {
-			console.error('Failed to save potential:', error);
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan potensi', message: msg });
 		}
 	}
 
@@ -145,8 +149,11 @@
 			try {
 				await deletePotential({ id });
 				await queryClient.invalidateQueries({ queryKey: ['potentials', 'list'] });
+				toast.success('Potensi berhasil dihapus.');
 			} catch (error) {
-				console.error('Failed to delete potential:', error);
+				const err = error as { apiResponse?: { message?: string }; message?: string };
+				const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+				toast.error({ title: 'Gagal menghapus potensi', message: msg });
 			}
 		}
 	}

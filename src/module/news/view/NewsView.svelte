@@ -19,6 +19,7 @@
 	import { Plus, Search, Loader2, Pencil, Trash2 } from '@lucide/svelte';
 	import ImageUploader from '$lib/components/ui/ImageUploader.svelte';
 	import MediaThumbnail from '$lib/components/ui/MediaThumbnail.svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	const queryClient = useQueryClient();
 	const articlesQuery = createQuery(() => ({
@@ -38,6 +39,7 @@
 
 	let isDialogOpen = $state(false);
 	let editingItem = $state<NewsData | null>(null);
+	let isPreparingForm = $state(false);
 	let editForm = $state({
 		title: '',
 		description: '',
@@ -60,15 +62,31 @@
 
 	let isLoading = $derived(articlesQuery.isPending || categoriesQuery.isPending);
 
-	const handleCreate = () => {
-		editingItem = null;
-		editForm = {
-			title: '',
-			description: '',
-			category_id: categories.length > 0 ? categories[0].id : 0,
-			media_id: ''
-		};
-		isDialogOpen = true;
+	const getNewsCategories = (items = categoriesQuery.data?.data || []) => {
+		return items.filter((category) => category.type === 'news');
+	};
+
+	const getDefaultCategoryId = (items = categories) => {
+		return items.length > 0 ? items[0].id : 0;
+	};
+
+	const handleCreate = async () => {
+		isPreparingForm = true;
+		try {
+			const categoryResult = categories.length > 0 ? null : await categoriesQuery.refetch();
+			const latestCategories = getNewsCategories(categoryResult?.data?.data || categories);
+
+			editingItem = null;
+			editForm = {
+				title: '',
+				description: '',
+				category_id: getDefaultCategoryId(latestCategories),
+				media_id: ''
+			};
+			isDialogOpen = true;
+		} finally {
+			isPreparingForm = false;
+		}
 	};
 
 	const handleEdit = (item: NewsData) => {
@@ -84,28 +102,41 @@
 
 	const handleSave = async (e: Event) => {
 		e.preventDefault();
+		const categoryId = Number(editForm.category_id);
+
+		if (!categoryId) {
+			toast.error({
+				title: 'Kategori belum dipilih',
+				message: 'Pilih kategori berita terlebih dahulu sebelum menyimpan.'
+			});
+			return;
+		}
+
 		try {
 			if (editingItem) {
 				await updateNews({
 					id: editingItem.id,
 					title: editForm.title,
 					description: editForm.description,
-					category_id: Number(editForm.category_id),
+					category_id: categoryId,
 					media_id: editForm.media_id.trim() || null
 				});
 			} else {
 				await createNews({
 					title: editForm.title,
 					description: editForm.description,
-					category_id: Number(editForm.category_id),
+					category_id: categoryId,
 					media_id: editForm.media_id.trim() || null
 				});
 			}
 			isDialogOpen = false;
 			editingItem = null;
 			await queryClient.invalidateQueries({ queryKey: ['news', 'list'] });
+			toast.success('Berita berhasil disimpan!');
 		} catch (error) {
-			console.error('Failed to save article:', error);
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan berita', message: msg });
 		}
 	};
 
@@ -114,8 +145,11 @@
 			try {
 				await deleteNews({ id });
 				await queryClient.invalidateQueries({ queryKey: ['news', 'list'] });
+				toast.success('Berita berhasil dihapus.');
 			} catch (error) {
-				console.error('Failed to delete article:', error);
+				const err = error as { apiResponse?: { message?: string }; message?: string };
+				const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+				toast.error({ title: 'Gagal menghapus berita', message: msg });
 			}
 		}
 	};
@@ -142,9 +176,14 @@
 				Kelola, publikasi, dan sunting konten tulisan informasi Desa Cipicung.
 			</p>
 		</div>
-		<Button onclick={handleCreate}>
-			<Plus size={16} strokeWidth={2.5} />
-			Tulis Konten Baru
+		<Button onclick={handleCreate} disabled={isPreparingForm || categoriesQuery.isPending}>
+			{#if isPreparingForm || categoriesQuery.isPending}
+				<Loader2 size={16} class="animate-spin" />
+				Memuat Kategori...
+			{:else}
+				<Plus size={16} strokeWidth={2.5} />
+				Tulis Konten Baru
+			{/if}
 		</Button>
 	</div>
 
@@ -287,6 +326,11 @@
 					>Kategori</label
 				>
 				<CategorySelect id="edit-cat" bind:value={editForm.category_id} {categories} required />
+				{#if categoriesQuery.isError}
+					<p class="text-[11px] font-semibold text-red-600">Gagal memuat kategori.</p>
+				{:else if categories.length === 0}
+					<p class="text-[11px] font-semibold text-slate-400">Belum ada kategori berita.</p>
+				{/if}
 			</div>
 		</div>
 

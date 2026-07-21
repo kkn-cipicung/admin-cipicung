@@ -4,6 +4,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { Loader2 } from '@lucide/svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	const contactQuery = createQuery(() => ({
 		queryKey: ['contact', 'detail'],
@@ -32,6 +33,11 @@
 		try {
 			if (id) await updateContact({ id: Number(id), ...payload });
 			else await createContact(payload);
+			toast.success('Kontak berhasil disimpan!');
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan kontak', message: msg });
 		} finally {
 			isSaving = false;
 		}

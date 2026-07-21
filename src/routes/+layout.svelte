@@ -2,6 +2,7 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Sidebar from '$lib/components/Sidebar.svelte';
+	import Toast from '$lib/components/ui/Toast.svelte';
 	import { createQueryClient } from '$lib/query-client';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -118,3 +119,5 @@
 		</div>
 	{/if}
 </QueryClientProvider>
+
+<Toast />

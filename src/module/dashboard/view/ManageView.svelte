@@ -25,6 +25,7 @@
 	import CategorySelect from '$lib/components/ui/CategorySelect.svelte';
 	import MediaThumbnail from '$lib/components/ui/MediaThumbnail.svelte';
 	import { Plus, Search, Loader2, Pencil, Trash2, CircleCheck, CircleX } from '@lucide/svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	const queryClient = useQueryClient();
 	const dashboardsQuery = createQuery(() => ({
@@ -113,8 +114,11 @@
 			isDialogOpen = false;
 			editingItem = null;
 			await queryClient.invalidateQueries({ queryKey: ['dashboards', 'list'] });
+			toast.success('Konten dashboard berhasil disimpan!');
 		} catch (error) {
-			console.error('Failed to save dashboard item:', error);
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan dashboard', message: msg });
 		}
 	}
 
@@ -123,8 +127,11 @@
 			try {
 				await deleteDashboard({ id });
 				await queryClient.invalidateQueries({ queryKey: ['dashboards', 'list'] });
+				toast.success('Konten dashboard berhasil dihapus.');
 			} catch (error) {
-				console.error('Failed to delete dashboard item:', error);
+				const err = error as { apiResponse?: { message?: string }; message?: string };
+				const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+				toast.error({ title: 'Gagal menghapus dashboard', message: msg });
 			}
 		}
 	}
@@ -136,8 +143,11 @@
 		try {
 			await activateDashboard({ id });
 			await queryClient.invalidateQueries({ queryKey: ['dashboards', 'list'] });
+			toast.success('Konten berhasil diaktifkan!');
 		} catch (error) {
-			console.error('Failed to activate dashboard item:', error);
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal mengaktifkan konten', message: msg });
 		} finally {
 			activatingId = null;
 		}

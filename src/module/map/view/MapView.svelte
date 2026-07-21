@@ -4,6 +4,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { Loader2 } from '@lucide/svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	const queryClient = useQueryClient();
 	const mapQuery = createQuery(() => ({
@@ -35,6 +36,11 @@
 			if (hasHydrated) await updateMap(form);
 			else await createMap(form);
 			await queryClient.invalidateQueries({ queryKey: ['map', 'detail'] });
+			toast.success('Data peta berhasil disimpan!');
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan peta', message: msg });
 		} finally {
 			isSaving = false;
 		}

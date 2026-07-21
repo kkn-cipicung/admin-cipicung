@@ -11,6 +11,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import { Loader2, Plus, Trash2 } from '@lucide/svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	type HeadmanForm = {
 		name: string;
@@ -136,6 +137,11 @@
 		};
 		try {
 			await saveProfile(payload);
+			toast.success({ title: 'Berhasil!', message: 'Profil desa berhasil disimpan.' });
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan', message: msg });
 		} finally {
 			isSaving = false;
 		}

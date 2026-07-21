@@ -17,6 +17,7 @@
 	import Dialog from '$lib/components/ui/Dialog.svelte';
 	import CategorySelect from '$lib/components/ui/CategorySelect.svelte';
 	import { Loader2, Pencil, Phone, Plus, Search, Trash2 } from '@lucide/svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	const queryClient = useQueryClient();
 	const businessesQuery = createQuery(() => ({
@@ -135,8 +136,11 @@
 			isDialogOpen = false;
 			editingItem = null;
 			await queryClient.invalidateQueries({ queryKey: ['businesses', 'list'] });
+			toast.success('Data bisnis berhasil disimpan!');
 		} catch (error) {
-			console.error('Failed to save business:', error);
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan bisnis', message: msg });
 		}
 	}
 
@@ -145,8 +149,11 @@
 			try {
 				await deleteBusiness({ id });
 				await queryClient.invalidateQueries({ queryKey: ['businesses', 'list'] });
+				toast.success('Data bisnis berhasil dihapus.');
 			} catch (error) {
-				console.error('Failed to delete business:', error);
+				const err = error as { apiResponse?: { message?: string }; message?: string };
+				const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+				toast.error({ title: 'Gagal menghapus bisnis', message: msg });
 			}
 		}
 	}

@@ -15,6 +15,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
 	import { Plus, Search, Loader2, Pencil, Trash2 } from '@lucide/svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
 	const queryClient = useQueryClient();
 	const categoriesQuery = createQuery(() => ({
@@ -79,8 +80,11 @@
 			isDialogOpen = false;
 			editingItem = null;
 			await queryClient.invalidateQueries({ queryKey: ['categories', 'list'] });
+			toast.success('Kategori berhasil disimpan!');
 		} catch (error) {
-			console.error('Failed to save category:', error);
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan kategori', message: msg });
 		}
 	};
 
@@ -89,8 +93,11 @@
 			try {
 				await deleteCategory({ id });
 				await queryClient.invalidateQueries({ queryKey: ['categories', 'list'] });
+				toast.success('Kategori berhasil dihapus.');
 			} catch (error) {
-				console.error('Failed to delete category:', error);
+				const err = error as { apiResponse?: { message?: string }; message?: string };
+				const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+				toast.error({ title: 'Gagal menghapus kategori', message: msg });
 			}
 		}
 	};
