@@ -7,7 +7,8 @@ export const DashboardDataSchema = z.object({
 	category: z.object({ id: z.number(), name: z.string() }),
 	title: z.string(),
 	description: z.string(),
-	media_id: z.number().nullable(),
+	media: z.string().optional().nullable(),
+	media_id: z.union([z.number(), z.string()]).optional().nullable(),
 	is_active: z.boolean(),
 	created_at: z.string()
 });

@@ -7,7 +7,8 @@ export const NewsDataSchema = z.object({
 	uploader: z.object({ id: z.number(), name: z.string() }),
 	title: z.string(),
 	description: z.string(),
-	media_id: z.number().nullable(),
+	media: z.string().optional().nullable(),
+	media_id: z.union([z.number(), z.string()]).optional().nullable(),
 	source: z.string(),
 	created_at: z.string()
 });

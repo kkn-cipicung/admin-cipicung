@@ -8,9 +8,10 @@ export const PotentialDataSchema = z.object({
 	subtitle: z.string().nullable(),
 	slug: z.string(),
 	description: z.string(),
-	location: z.object({ id: z.number() }),
+	location: z.object({ id: z.number() }).nullable().optional(),
 	owner: z.object({ name: z.string(), msisdn: z.string().nullable() }),
-	media_id: z.number().nullable(),
+	media: z.string().optional().nullable(),
+	media_id: z.union([z.number(), z.string()]).optional().nullable(),
 	created_at: z.string()
 });
 export type PotentialData = z.infer<typeof PotentialDataSchema>;

@@ -226,7 +226,7 @@
 						<TableRow>
 							<TableCell class="text-center font-bold text-slate-400">{index + 1}</TableCell>
 							<TableCell class="text-center">
-								<MediaThumbnail media={item.media_id} alt={item.title} />
+								<MediaThumbnail media={item.media ?? item.media_id} alt={item.title} />
 							</TableCell>
 							<TableCell class="font-bold text-slate-900">{item.title}</TableCell>
 							<TableCell class="max-w-xs text-xs">
