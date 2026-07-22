@@ -1,12 +1,13 @@
 <script lang="ts">
 	import {
 		getGovernmentStructure,
+		getProfile,
 		getRegionBoundary,
 		getResourcePotential,
 		getVisionMission,
 		saveProfile
 	} from '../_request';
-	import { createQuery } from '@tanstack/svelte-query';
+	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
@@ -21,6 +22,12 @@
 		is_active: boolean;
 	};
 
+	const queryClient = useQueryClient();
+	const profileQuery = createQuery(() => ({
+		queryKey: ['profile', 'detail'],
+		queryFn: () => getProfile(),
+		retry: false
+	}));
 	const regionQuery = createQuery(() => ({
 		queryKey: ['profile', 'region'],
 		queryFn: getRegionBoundary,
@@ -63,7 +70,6 @@
 		south_border: '',
 		west_border: '',
 		area: '',
-		population: '',
 		latitude: '',
 		longitude: '',
 		headmen: [
@@ -76,7 +82,58 @@
 			}
 		] as HeadmanForm[]
 	});
+	let profileId = $state<number | null>(null);
+	let hasHydrated = $state(false);
 	let isSaving = $state(false);
+
+	$effect(() => {
+		const data = profileQuery.data?.data;
+		if (data && !hasHydrated) {
+			if (data.id) profileId = data.id;
+			form = {
+				name: data.name || '',
+				province: data.province || '',
+				regency: data.regency || '',
+				district: data.district || '',
+				address: data.address || '',
+				postal_code: data.postal_code || '',
+				phone: data.phone || '',
+				email: data.email || '',
+				vision: data.vision || '',
+				mission: Array.isArray(data.mission) ? data.mission.join('\n') : (data.mission || ''),
+				history: data.history || '',
+				description: data.description || '',
+				region: data.region || '',
+				hamlet_one: data.hamlet_one !== undefined && data.hamlet_one !== null ? String(data.hamlet_one) : '',
+				hamlet_two: data.hamlet_two !== undefined && data.hamlet_two !== null ? String(data.hamlet_two) : '',
+				north_border: data.north_border || '',
+				east_border: data.east_border || '',
+				south_border: data.south_border || '',
+				west_border: data.west_border || '',
+				area: data.area || '',
+				latitude: data.latitude !== undefined && data.latitude !== null ? String(data.latitude) : '',
+				longitude: data.longitude !== undefined && data.longitude !== null ? String(data.longitude) : '',
+				headmen: Array.isArray(data.headmen) && data.headmen.length > 0
+					? data.headmen.map((h) => ({
+							name: h.name || '',
+							position: h.position || 'kepala-desa',
+							start_date: h.start_date || '',
+							finish_date: h.finish_date || '',
+							is_active: Boolean(h.is_active)
+					  }))
+					: [
+							{
+								name: '',
+								position: 'kepala-desa',
+								start_date: '',
+								finish_date: '',
+								is_active: true
+							}
+					  ]
+			};
+			hasHydrated = true;
+		}
+	});
 
 	function addHeadman() {
 		form.headmen = [
@@ -99,6 +156,7 @@
 		event.preventDefault();
 		isSaving = true;
 		const payload = {
+			...(profileId ? { id: profileId } : {}),
 			name: form.name,
 			province: form.province,
 			regency: form.regency,
@@ -115,14 +173,13 @@
 			history: form.history || undefined,
 			description: form.description || undefined,
 			region: form.region || undefined,
-			hamlet_one: form.hamlet_one || undefined,
-			hamlet_two: form.hamlet_two || undefined,
+			hamlet_one: form.hamlet_one !== '' && form.hamlet_one !== null && form.hamlet_one !== undefined ? Number(form.hamlet_one) : undefined,
+			hamlet_two: form.hamlet_two !== '' && form.hamlet_two !== null && form.hamlet_two !== undefined ? Number(form.hamlet_two) : undefined,
 			north_border: form.north_border || undefined,
 			east_border: form.east_border || undefined,
 			south_border: form.south_border || undefined,
 			west_border: form.west_border || undefined,
 			area: form.area || undefined,
-			population: form.population || undefined,
 			latitude: form.latitude ? Number(form.latitude) : undefined,
 			longitude: form.longitude ? Number(form.longitude) : undefined,
 			headmen: form.headmen
@@ -137,6 +194,7 @@
 		};
 		try {
 			await saveProfile(payload);
+			await queryClient.invalidateQueries({ queryKey: ['profile'] });
 			toast.success({ title: 'Berhasil!', message: 'Profil desa berhasil disimpan.' });
 		} catch (error) {
 			const err = error as { apiResponse?: { message?: string }; message?: string };
@@ -172,7 +230,6 @@
 			<Input bind:value={form.south_border} placeholder="Batas selatan" />
 			<Input bind:value={form.west_border} placeholder="Batas barat" />
 			<Input bind:value={form.area} placeholder="Luas wilayah" />
-			<Input bind:value={form.population} placeholder="Populasi" />
 			<Input bind:value={form.latitude} placeholder="Latitude" />
 			<Input bind:value={form.longitude} placeholder="Longitude" />
 		</div>
@@ -260,7 +317,7 @@
 			<h3 class="text-sm font-bold text-slate-900">Wilayah</h3>
 			<p class="mt-3 text-xs font-semibold text-slate-500">
 				{regionQuery.data?.data?.region || '-'}<br />
-				{regionQuery.data?.data?.area || '-'} · {regionQuery.data?.data?.population || '-'}
+				{regionQuery.data?.data?.area || '-'}
 			</p>
 		</section>
 		<section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

@@ -60,7 +60,7 @@
 			title: item.title,
 			description: '',
 			category_id: categories[0]?.id || 0,
-			media_id: ''
+			media_id: item.image || ''
 		};
 		isDialogOpen = true;
 		try {
@@ -69,7 +69,7 @@
 				title: detail.data.title,
 				description: detail.data.description,
 				category_id: detail.data.category[0]?.id || categories[0]?.id || 0,
-				media_id: ''
+				media_id: detail.data.image || item.image || ''
 			};
 		} catch (error) {
 			console.error('Failed to load gallery detail:', error);

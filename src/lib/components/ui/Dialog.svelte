@@ -1,3 +1,7 @@
+<script lang="ts" module>
+	let activeDialogCount = 0;
+</script>
+
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -15,6 +19,21 @@
 		children?: Snippet;
 		maxWidth?: string;
 	} = $props();
+
+	$effect(() => {
+		if (isOpen) {
+			if (activeDialogCount === 0) {
+				document.body.style.overflow = 'hidden';
+			}
+			activeDialogCount++;
+			return () => {
+				activeDialogCount = Math.max(0, activeDialogCount - 1);
+				if (activeDialogCount === 0) {
+					document.body.style.overflow = '';
+				}
+			};
+		}
+	});
 </script>
 
 {#if isOpen}
@@ -23,10 +42,10 @@
 		transition:fade={{ duration: 150 }}
 	>
 		<div
-			class="w-full {maxWidth} overflow-hidden bg-white border border-slate-200 rounded-2xl shadow-xl flex flex-col"
+			class="w-full {maxWidth} max-h-[calc(100vh-2rem)] bg-white border border-slate-200 rounded-2xl shadow-xl flex flex-col overflow-hidden"
 		>
 			<div
-				class="flex items-center justify-between border-b border-slate-100 px-6 py-4.5 bg-slate-50/50"
+				class="flex items-center justify-between border-b border-slate-100 px-6 py-4.5 bg-slate-50/50 shrink-0"
 			>
 				<div class="flex flex-col">
 					<h3 class="text-sm font-bold text-slate-900">{title}</h3>
@@ -36,6 +55,7 @@
 				</div>
 				<button
 					type="button"
+					aria-label="Tutup dialog"
 					onclick={() => (isOpen = false)}
 					class="text-slate-400 hover:text-slate-700 rounded-lg p-1 hover:bg-slate-100 transition-colors"
 				>
@@ -54,9 +74,12 @@
 				</button>
 			</div>
 
-			{#if children}
-				{@render children()}
-			{/if}
+			<div class="flex-1 overflow-y-auto min-h-0">
+				{#if children}
+					{@render children()}
+				{/if}
+			</div>
 		</div>
 	</div>
 {/if}
+

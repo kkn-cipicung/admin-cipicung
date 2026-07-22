@@ -40,14 +40,14 @@ export type ProfileResponse = z.infer<typeof ProfileResponseSchema>;
 export const RegionBoundaryResponseSchema = BaseResponseSchema(
 	z.object({
 		region: z.string(),
-		hamlet_one: z.string(),
-		hamlet_two: z.string(),
+		hamlet_one: z.union([z.number(), z.string()]),
+		hamlet_two: z.union([z.number(), z.string()]),
 		north_border: z.string(),
 		east_border: z.string(),
 		south_border: z.string(),
 		west_border: z.string(),
 		area: z.string(),
-		population: z.string()
+		population: z.string().optional()
 	})
 );
 export type RegionBoundaryResponse = z.infer<typeof RegionBoundaryResponseSchema>;

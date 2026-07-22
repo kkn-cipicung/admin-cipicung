@@ -3,7 +3,7 @@
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
-	import { Loader2, MapPin, Mountain, Users, Save } from '@lucide/svelte';
+	import { Loader2, MapPin, Mountain, Save } from '@lucide/svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 
 	const queryClient = useQueryClient();
@@ -14,13 +14,9 @@
 	}));
 
 	let mapId = $state<number | null>(null);
-	let form = $state({ elevation: '', coordinate: '', hamlet_one: '', hamlet_two: '' });
+	let form = $state({ elevation: '', coordinate: '' });
 	let hasHydrated = $state(false);
 	let isSaving = $state(false);
-
-	let calculatedPopulation = $derived(
-		(Number(form.hamlet_one) || 0) + (Number(form.hamlet_two) || 0)
-	);
 
 	$effect(() => {
 		const data = mapQuery.data?.data;
@@ -28,9 +24,7 @@
 			if (data.id) mapId = data.id;
 			form = {
 				elevation: data.elevation || '',
-				coordinate: data.coordinate || '',
-				hamlet_one: String(data.hamlet_one ?? ''),
-				hamlet_two: String(data.hamlet_two ?? '')
+				coordinate: data.coordinate || ''
 			};
 			hasHydrated = true;
 		}
@@ -42,9 +36,7 @@
 
 		const payload = {
 			elevation: form.elevation.trim(),
-			coordinate: form.coordinate.trim(),
-			hamlet_one: Number(form.hamlet_one),
-			hamlet_two: Number(form.hamlet_two)
+			coordinate: form.coordinate.trim()
 		};
 
 		try {
@@ -74,7 +66,7 @@
 			<div>
 				<h2 class="text-base font-bold text-slate-900">Pengelolaan Peta</h2>
 				<p class="mt-0.5 text-xs font-medium text-slate-500">
-					Kelola elevasi, koordinat, dan informasi dusun desa.
+					Kelola elevasi dan koordinat peta lokasi desa.
 				</p>
 			</div>
 			{#if mapQuery.isPending}
@@ -108,38 +100,9 @@
 					required
 				/>
 			</div>
-
-			<div class="space-y-1.5">
-				<label for="map-hamlet-one" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">
-					Jumlah Penduduk Dusun 1
-				</label>
-				<Input
-					type="number"
-					id="map-hamlet-one"
-					bind:value={form.hamlet_one}
-					placeholder="0"
-					required
-				/>
-			</div>
-
-			<div class="space-y-1.5">
-				<label for="map-hamlet-two" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">
-					Jumlah Penduduk Dusun 2
-				</label>
-				<Input
-					type="number"
-					id="map-hamlet-two"
-					bind:value={form.hamlet_two}
-					placeholder="0"
-					required
-				/>
-			</div>
 		</div>
 
-		<div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-			<div class="text-xs font-bold text-slate-500">
-				Total Estimasi Populasi: <span class="text-slate-900 font-extrabold">{calculatedPopulation} Jiwa</span>
-			</div>
+		<div class="pt-4 border-t border-slate-100 flex items-center justify-end">
 			<Button type="submit" disabled={isSaving}>
 				{#if isSaving}
 					<Loader2 size={16} class="animate-spin" />
@@ -173,19 +136,6 @@
 					<div>
 						<div class="text-[11px] font-bold text-slate-400 uppercase">Koordinat GPS</div>
 						<div class="text-sm font-mono font-bold text-slate-900">{form.coordinate || '-'}</div>
-					</div>
-				</div>
-
-				<div class="flex items-start gap-3">
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-50 text-purple-600 shrink-0">
-						<Users size={18} />
-					</div>
-					<div>
-						<div class="text-[11px] font-bold text-slate-400 uppercase">Rincian Populasi</div>
-						<div class="text-xs font-semibold text-slate-700 mt-0.5">
-							Dusun 1: <span class="font-bold text-slate-900">{form.hamlet_one || '0'}</span> · 
-							Dusun 2: <span class="font-bold text-slate-900">{form.hamlet_two || '0'}</span>
-						</div>
 					</div>
 				</div>
 			</div>

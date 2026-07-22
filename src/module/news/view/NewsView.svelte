@@ -95,7 +95,7 @@
 			title: item.title,
 			description: item.description,
 			category_id: item.category.id,
-			media_id: ''
+			media_id: item.media_id ? String(item.media_id) : item.media || ''
 		};
 		isDialogOpen = true;
 	};

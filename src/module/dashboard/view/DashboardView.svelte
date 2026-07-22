@@ -1,367 +1,354 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { pingServer } from '../../utility/_request';
-	import { listNews } from '../../news/_request';
+	import type { DashboardData } from '../_model/response';
+	import {
+		listDashboards,
+		createDashboard,
+		updateDashboard,
+		deleteDashboard,
+		activateDashboard
+	} from '../_request';
 	import { listCategories } from '../../category/_request';
-	import { listPotentials } from '../../potential/_request';
-	import { listDashboards } from '../_request';
-	import { createQuery } from '@tanstack/svelte-query';
-	import { Download, ArrowRight, Users, Eye, Activity, Clock } from '@lucide/svelte';
+	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
+	import {
+		Table,
+		TableHeader,
+		TableBody,
+		TableRow,
+		TableHead,
+		TableCell
+	} from '$lib/components/ui/table';
+	import Button from '$lib/components/ui/Button.svelte';
+	import Input from '$lib/components/ui/Input.svelte';
+	import Textarea from '$lib/components/ui/Textarea.svelte';
+	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import ImageUploader from '$lib/components/ui/ImageUploader.svelte';
+	import CategorySelect from '$lib/components/ui/CategorySelect.svelte';
+	import MediaThumbnail from '$lib/components/ui/MediaThumbnail.svelte';
+	import { Plus, Search, Loader2, Pencil, Trash2, CircleCheck, CircleX } from '@lucide/svelte';
+	import { toast } from '$lib/stores/toast.svelte';
 
-	let serverStatus = $state('Checking...');
-	let dbStatus = $state('Checking...');
-	let responseTime = $state('...');
-	let mediaStatus = $state('12.4 GB / 50 GB');
-
-	const newsQuery = createQuery(() => ({
-		queryKey: ['news', 'list'],
-		queryFn: () => listNews()
-	}));
-	const categoriesQuery = createQuery(() => ({
-		queryKey: ['categories', 'list'],
-		queryFn: () => listCategories()
-	}));
-	const potentialsQuery = createQuery(() => ({
-		queryKey: ['potentials', 'list'],
-		queryFn: () => listPotentials()
-	}));
+	const queryClient = useQueryClient();
 	const dashboardsQuery = createQuery(() => ({
 		queryKey: ['dashboards', 'list'],
 		queryFn: () => listDashboards()
 	}));
+	const categoriesQuery = createQuery(() => ({
+		queryKey: ['categories', 'list', 'dashboard'],
+		queryFn: () => listCategories()
+	}));
 
-	let newsCount = $derived<number | string>(
-		newsQuery.isPending ? '...' : newsQuery.data?.data?.length || 0
+	let dashboardItems = $derived(dashboardsQuery.data?.data || []);
+	let categories = $derived(
+		(categoriesQuery.data?.data || []).filter((category) => category.type === 'dashboard')
 	);
-	let potentialCount = $derived<number | string>(
-		potentialsQuery.isPending ? '...' : potentialsQuery.data?.data?.length || 0
-	);
-	let categoryCount = $derived<number | string>(
-		categoriesQuery.isPending ? '...' : categoriesQuery.data?.data?.length || 0
-	);
-	let slideCount = $derived<number | string>(
-		dashboardsQuery.isPending ? '...' : dashboardsQuery.data?.data?.length || 0
-	);
+	let isLoading = $derived(dashboardsQuery.isPending || categoriesQuery.isPending);
 
-	let systemHealth = $derived([
-		{
-			name: 'Database API',
-			status: dbStatus,
-			badge:
-				dbStatus === 'Connected'
-					? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-					: dbStatus === 'Checking...'
-						? 'bg-slate-50 text-slate-700 border-slate-200'
-						: 'bg-red-50 text-red-700 border-red-200'
-		},
-		{
-			name: 'Waktu Respon Server',
-			status: responseTime,
-			badge:
-				responseTime !== '...' && responseTime !== 'N/A'
-					? 'bg-blue-50 text-blue-700 border-blue-200'
-					: 'bg-slate-50 text-slate-700 border-slate-200'
-		},
-		{
-			name: 'Penyimpanan Media',
-			status: mediaStatus,
-			badge: 'bg-slate-100 text-slate-700 border-slate-200'
-		},
-		{
-			name: 'Koneksi Gateway',
-			status: serverStatus,
-			badge:
-				serverStatus === 'Active'
-					? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-					: serverStatus === 'Checking...'
-						? 'bg-slate-50 text-slate-700 border-slate-200'
-						: 'bg-red-50 text-red-700 border-red-200'
-		}
-	]);
-
-	let totalResources = $derived(
-		(typeof newsCount === 'number' ? newsCount : 0) +
-			(typeof potentialCount === 'number' ? potentialCount : 0) +
-			(typeof categoryCount === 'number' ? categoryCount : 0)
-	);
-
-	let moduleShare = $derived([
-		{
-			name: 'Berita & Informasi (News)',
-			percent:
-				totalResources > 0
-					? Math.round(((typeof newsCount === 'number' ? newsCount : 0) / totalResources) * 100)
-					: 0,
-			visits: typeof newsCount === 'number' ? newsCount : 0,
-			color: 'bg-blue-600'
-		},
-		{
-			name: 'Potensi Desa & UMKM (Potential)',
-			percent:
-				totalResources > 0
-					? Math.round(
-							((typeof potentialCount === 'number' ? potentialCount : 0) / totalResources) * 100
-						)
-					: 0,
-			visits: typeof potentialCount === 'number' ? potentialCount : 0,
-			color: 'bg-indigo-600'
-		},
-		{
-			name: 'Informasi Kategori (Category)',
-			percent:
-				totalResources > 0
-					? Math.round(
-							((typeof categoryCount === 'number' ? categoryCount : 0) / totalResources) * 100
-						)
-					: 0,
-			visits: typeof categoryCount === 'number' ? categoryCount : 0,
-			color: 'bg-purple-600'
-		}
-	]);
-
-	const analyticsStats = $derived([
-		{
-			name: 'Total Berita',
-			count: String(newsCount),
-			change: 'Dikelola',
-			icon: 'eye',
-			desc: 'Konten artikel & informasi publik',
-			bgClass: 'bg-blue-50 text-blue-600',
-			badgeClass: 'text-blue-600 bg-blue-50/50'
-		},
-		{
-			name: 'Potensi & UMKM',
-			count: String(potentialCount),
-			change: 'Terdaftar',
-			icon: 'users',
-			desc: 'Komoditas & ekowisata desa',
-			bgClass: 'bg-indigo-50 text-indigo-600',
-			badgeClass: 'text-indigo-600 bg-indigo-50/50'
-		},
-		{
-			name: 'Total Kategori',
-			count: String(categoryCount),
-			change: 'Klasifikasi',
-			icon: 'bounce',
-			desc: 'Klasifikasi konten modul client',
-			bgClass: 'bg-emerald-50 text-emerald-600',
-			badgeClass: 'text-emerald-600 bg-emerald-50/50'
-		},
-		{
-			name: 'Total Slide Headline',
-			count: String(slideCount),
-			change: 'Aktif',
-			icon: 'clock',
-			desc: 'Slide banner pada halaman utama',
-			bgClass: 'bg-purple-50 text-purple-600',
-			badgeClass: 'text-purple-600 bg-purple-50/50'
-		}
-	]);
-
-	onMount(async () => {
-		try {
-			const start = Date.now();
-			const res = await pingServer();
-			const end = Date.now();
-
-			responseTime = `${end - start}ms`;
-			serverStatus = 'Active';
-			dbStatus =
-				res.data === 'pong' || res.message === 'pong' || res.data ? 'Connected' : 'Disconnected';
-		} catch (err) {
-			console.error('Server status check failed:', err);
-			serverStatus = 'Offline';
-			dbStatus = 'Disconnected';
-			responseTime = 'N/A';
-		}
+	let isDialogOpen = $state(false);
+	let editingItem = $state<DashboardData | null>(null);
+	let activatingId = $state<number | null>(null);
+	let searchQuery = $state('');
+	let editForm = $state({
+		title: '',
+		description: '',
+		category_id: 1,
+		media_id: ''
 	});
+	let filteredDashboardItems = $derived(
+		dashboardItems.filter((item) => {
+			const query = searchQuery.toLowerCase();
+			return searchQuery
+				? item.title.toLowerCase().includes(query) ||
+						item.description.toLowerCase().includes(query) ||
+						item.category.name.toLowerCase().includes(query)
+				: true;
+		})
+	);
+
+	function handleCreate() {
+		editingItem = null;
+		editForm = {
+			title: '',
+			description: '',
+			category_id: categories.length > 0 ? categories[0].id : 1,
+			media_id: ''
+		};
+		isDialogOpen = true;
+	}
+
+	function getCategoryName(categoryId: number) {
+		const category = categories.find((item) => item.id === categoryId);
+		return category ? `${category.name} (${category.type})` : `#${categoryId}`;
+	}
+
+	function handleEdit(item: DashboardData) {
+		editingItem = item;
+		editForm = {
+			title: item.title,
+			description: item.description,
+			category_id: item.category.id,
+			media_id: item.media_id ? String(item.media_id) : item.media || ''
+		};
+		isDialogOpen = true;
+	}
+
+	async function handleSave(e: Event) {
+		e.preventDefault();
+		try {
+			if (editingItem) {
+				await updateDashboard({
+					id: editingItem.id,
+					category_id: Number(editForm.category_id),
+					title: editForm.title,
+					description: editForm.description,
+					media_id: editForm.media_id.trim() || null,
+					is_active: editingItem.is_active
+				});
+			} else {
+				await createDashboard({
+					category_id: Number(editForm.category_id),
+					title: editForm.title,
+					description: editForm.description,
+					media_id: editForm.media_id.trim() || null
+				});
+			}
+			isDialogOpen = false;
+			editingItem = null;
+			await queryClient.invalidateQueries({ queryKey: ['dashboards', 'list'] });
+			toast.success('Konten dashboard berhasil disimpan!');
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan dashboard', message: msg });
+		}
+	}
+
+	async function handleDelete(id: number) {
+		if (confirm('Apakah Anda yakin ingin menghapus konten ini?')) {
+			try {
+				await deleteDashboard({ id });
+				await queryClient.invalidateQueries({ queryKey: ['dashboards', 'list'] });
+				toast.success('Konten dashboard berhasil dihapus.');
+			} catch (error) {
+				const err = error as { apiResponse?: { message?: string }; message?: string };
+				const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+				toast.error({ title: 'Gagal menghapus dashboard', message: msg });
+			}
+		}
+	}
+
+	async function handleActivate(id: number) {
+		if (activatingId !== null) return;
+
+		activatingId = id;
+		try {
+			await activateDashboard({ id });
+			await queryClient.invalidateQueries({ queryKey: ['dashboards', 'list'] });
+			toast.success('Konten berhasil diaktifkan!');
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal mengaktifkan konten', message: msg });
+		} finally {
+			activatingId = null;
+		}
+	}
+
+	function formatDate(isoString: string) {
+		return new Date(isoString).toLocaleDateString('id-ID', {
+			day: 'numeric',
+			month: 'short',
+			year: 'numeric'
+		});
+	}
 </script>
 
-<div class="space-y-8">
-	<div
-		class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6"
-	>
-		<div class="space-y-1">
-			<h2 class="text-xl font-extrabold tracking-tight text-slate-900">
-				Selamat Datang Kembali, Admin!
-			</h2>
-			<p class="text-xs font-semibold text-slate-400">
-				Semua sistem berjalan dengan normal. Berikut adalah statistik kinerja portal client Desa
-				Cipicung.
+<div class="space-y-6">
+	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+		<div>
+			<h2 class="text-base font-bold text-slate-900">Pengaturan Slide & Informasi Client</h2>
+			<p class="text-xs font-medium text-slate-550 mt-0.5">
+				Kelola data headline, slide gambar, dan sambutan yang tampil di halaman dashboard utama
+				aplikasi client.
 			</p>
 		</div>
-		<div class="flex items-center gap-3">
-			<button
-				class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all"
-			>
-				<Download size={14} strokeWidth={2.5} />
-				Unduh Laporan
-			</button>
-			<a
-				href="/dashboard/manage"
-				class="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/10 hover:bg-blue-700 hover:shadow-lg transition-all"
-			>
-				Atur Konten Client
-				<ArrowRight size={14} strokeWidth={2.5} />
-			</a>
+		<Button onclick={handleCreate}>
+			<Plus size={16} strokeWidth={2.5} />
+			Tambah Konten Slide
+		</Button>
+	</div>
+
+	<div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+		<div class="relative flex-1 max-w-sm">
+			<span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+				<Search size={16} />
+			</span>
+			<Input
+				placeholder="Cari konten dashboard..."
+				class="pl-9 bg-slate-50/50"
+				bind:value={searchQuery}
+			/>
 		</div>
 	</div>
 
-	<section class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-		{#each analyticsStats as stat (stat.name)}
-			<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-				<div class="flex items-center justify-between">
-					<span class="text-xs font-bold text-slate-400 uppercase tracking-wider">{stat.name}</span>
-					<div class="flex h-9 w-9 items-center justify-center rounded-xl {stat.bgClass}">
-						{#if stat.icon === 'users'}
-							<Users size={18} strokeWidth={2.5} />
-						{:else if stat.icon === 'eye'}
-							<Eye size={18} strokeWidth={2.5} />
-						{:else if stat.icon === 'bounce'}
-							<Activity size={18} strokeWidth={2.5} />
-						{:else}
-							<Clock size={18} strokeWidth={2.5} />
-						{/if}
-					</div>
-				</div>
-				<div class="mt-4 flex items-baseline gap-2">
-					<span class="text-3xl font-extrabold text-slate-900 tracking-tight">{stat.count}</span>
-					<span class="text-xs font-bold rounded-full px-2 py-0.5 {stat.badgeClass}"
-						>{stat.change}</span
-					>
-				</div>
-				<p class="text-[11px] font-medium text-slate-400 mt-1.5">{stat.desc}</p>
-			</div>
-		{/each}
-	</section>
-
-	<section class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-		<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2 space-y-6">
-			<div class="flex items-center justify-between border-b border-slate-150 pb-4">
-				<div>
-					<h3 class="text-base font-bold text-slate-900">Statistik Pengunjung (7 Hari Terakhir)</h3>
-					<p class="text-xs font-medium text-slate-400 mt-0.5">
-						Grafik harian total kunjungan halaman pada portal publik.
-					</p>
-				</div>
-				<div
-					class="flex items-center gap-1 bg-slate-100 border border-slate-200/50 p-1 rounded-xl text-xs font-bold text-slate-600"
-				>
-					<span class="bg-white text-slate-950 px-3 py-1 rounded-lg shadow-sm">Kunjungan</span>
-					<span class="px-3 py-1">Sesi</span>
-				</div>
-			</div>
-
-			<div class="w-full h-64 relative">
-				<svg class="w-full h-full" viewBox="0 0 500 200" preserveAspectRatio="none">
-					<line x1="0" y1="40" x2="500" y2="40" stroke="#f1f5f9" stroke-width="1.5" />
-					<line x1="0" y1="90" x2="500" y2="90" stroke="#f1f5f9" stroke-width="1.5" />
-					<line x1="0" y1="140" x2="500" y2="140" stroke="#f1f5f9" stroke-width="1.5" />
-					<line x1="0" y1="190" x2="500" y2="190" stroke="#e2e8f0" stroke-width="2" />
-
-					<defs>
-						<linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-							<stop offset="0%" stop-color="#8d7557" stop-opacity="0.25" />
-							<stop offset="100%" stop-color="#8d7557" stop-opacity="0.0" />
-						</linearGradient>
-					</defs>
-					<path
-						d="M 5,160 Q 80,130 160,80 T 320,110 T 495,30 L 495,190 L 5,190 Z"
-						fill="url(#chartGradient)"
-					/>
-
-					<path
-						d="M 5,160 Q 80,130 160,80 T 320,110 T 495,30"
-						fill="none"
-						stroke="#8d7557"
-						stroke-width="3"
-						stroke-linecap="round"
-					/>
-
-					<circle cx="160" cy="80" r="5" fill="#8d7557" stroke="#ffffff" stroke-width="2" />
-					<circle cx="320" cy="110" r="5" fill="#8d7557" stroke="#ffffff" stroke-width="2" />
-					<circle cx="495" cy="30" r="5" fill="#8d7557" stroke="#ffffff" stroke-width="2" />
-				</svg>
-
-				<div
-					class="absolute top-[20px] right-[20px] bg-slate-900 text-white rounded-lg p-2 shadow-lg text-[10px] space-y-0.5"
-				>
-					<div class="font-bold text-slate-400">Rabu, 08 Juli</div>
-					<div class="flex items-center gap-1.5 font-extrabold text-blue-400">
-						<span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
-						682 Pengunjung
-					</div>
-				</div>
-			</div>
-
-			<div
-				class="flex justify-between text-[11px] font-bold text-slate-400 px-1 border-t border-slate-100 pt-3"
-			>
-				<span>Kamis</span>
-				<span>Jumat</span>
-				<span>Sabtu</span>
-				<span>Minggu</span>
-				<span>Senin</span>
-				<span>Selasa</span>
-				<span>Rabu (Hari Ini)</span>
+	{#if isLoading}
+		<div class="flex items-center justify-center p-12 bg-white rounded-xl border border-slate-250">
+			<div class="flex items-center gap-3 text-slate-500 font-semibold text-sm">
+				<Loader2 size={20} class="animate-spin" />
+				Memuat data slide...
 			</div>
 		</div>
-
-		<div class="flex flex-col gap-6">
-			<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-				<div>
-					<h3 class="text-base font-bold text-slate-900">Proporsi Konten Modul</h3>
-					<p class="text-xs font-medium text-slate-400 mt-0.5">
-						Proporsi sebaran data konten yang terintegrasi.
-					</p>
-				</div>
-				<div class="space-y-4">
-					{#each moduleShare as item (item.name)}
-						<div class="space-y-1.5">
-							<div class="flex items-center justify-between text-xs font-bold text-slate-700">
-								<span>{item.name}</span>
-								<span class="text-slate-900"
-									>{item.percent}%
-									<span class="font-semibold text-slate-400">({item.visits})</span></span
+	{:else}
+		<Table>
+			<TableHeader>
+				<TableRow>
+					<TableHead class="w-16 text-center">No</TableHead>
+					<TableHead class="w-24 text-center">Gambar</TableHead>
+					<TableHead>Judul Konten</TableHead>
+					<TableHead>Deskripsi Slide</TableHead>
+					<TableHead class="text-center">Kategori</TableHead>
+					<TableHead class="text-center">Editor</TableHead>
+					<TableHead>Tanggal Dibuat</TableHead>
+					<TableHead class="text-right">Aksi</TableHead>
+				</TableRow>
+			</TableHeader>
+			<TableBody>
+				{#if filteredDashboardItems.length === 0}
+					<TableRow>
+						<TableCell colspan={8} class="text-center py-8 text-slate-400 font-medium">
+							Belum ada data slide dashboard.
+						</TableCell>
+					</TableRow>
+				{:else}
+					{#each filteredDashboardItems as item, index (item.id)}
+						<TableRow>
+							<TableCell class="text-center font-bold text-slate-400">{index + 1}</TableCell>
+							<TableCell class="text-center">
+								<MediaThumbnail media={item.media ?? item.media_id} alt={item.title} />
+							</TableCell>
+							<TableCell class="font-bold text-slate-900">{item.title}</TableCell>
+							<TableCell class="max-w-sm text-xs text-slate-500 line-clamp-1 py-5"
+								>{item.description}</TableCell
+							>
+							<TableCell class="text-center">
+								<span
+									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-slate-100 text-xs font-bold text-slate-650"
 								>
-							</div>
-							<div class="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
-								<div
-									class="h-full rounded-full {item.color} transition-all duration-500"
-									style="width: {item.percent}%"
-								></div>
-							</div>
-						</div>
-					{/each}
-				</div>
-			</div>
-
-			<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 flex-1">
-				<div>
-					<h3 class="text-base font-bold text-slate-900">Status Sistem & API</h3>
-					<p class="text-xs font-medium text-slate-400 mt-0.5">
-						Integrasi server backend dan database.
-					</p>
-				</div>
-
-				<div class="grid grid-cols-2 gap-3.5">
-					{#each systemHealth as item (item.name)}
-						<div
-							class="border border-slate-100 rounded-xl p-3 bg-slate-50/50 flex flex-col justify-between"
-						>
-							<span
-								class="text-[10px] font-bold text-slate-400 tracking-wider uppercase leading-none"
-								>{item.name}</span
+									{item.category.name || getCategoryName(item.category.id)}
+								</span>
+							</TableCell>
+							<TableCell class="text-center">
+								<span
+									class="inline-flex h-6 px-2.5 items-center justify-center rounded bg-blue-50 text-xs font-bold text-blue-700"
+								>
+									{item.creator.name || '#' + item.creator.id}
+								</span>
+							</TableCell>
+							<TableCell class="text-xs text-slate-500 whitespace-nowrap"
+								>{formatDate(item.created_at)}</TableCell
 							>
-							<span
-								class="inline-block mt-2 rounded border px-2 py-0.5 text-xs font-bold text-center w-full {item.badge}"
-							>
-								{item.status}
-							</span>
-						</div>
+							<TableCell class="text-right">
+								<div class="flex items-center justify-end gap-2">
+									<Button
+										size="sm"
+										class={item.is_active
+											? 'bg-emerald-600 text-white hover:bg-emerald-600 shadow-none'
+											: 'bg-red-600 text-white hover:bg-red-700 shadow-none'}
+										title={item.is_active
+											? 'Konten sedang aktif'
+											: 'Klik untuk mengaktifkan konten'}
+										aria-disabled={item.is_active}
+										disabled={activatingId !== null}
+										onclick={() => !item.is_active && handleActivate(item.id)}
+									>
+										{#if activatingId === item.id}
+											<Loader2 size={14} class="animate-spin" />
+											Mengaktifkan...
+										{:else if item.is_active}
+											<CircleCheck size={14} />
+											Aktif
+										{:else}
+											<CircleX size={14} />
+											Nonaktif
+										{/if}
+									</Button>
+									<Button
+										variant="outline"
+										size="icon"
+										onclick={() => handleEdit(item)}
+										title="Ubah Konten"
+									>
+										<Pencil size={14} />
+									</Button>
+									<Button
+										variant="outline"
+										size="icon"
+										class="hover:bg-red-50 hover:text-red-650 hover:border-red-200"
+										title="Hapus Konten"
+										onclick={() => handleDelete(item.id)}
+									>
+										<Trash2 size={14} />
+									</Button>
+								</div>
+							</TableCell>
+						</TableRow>
 					{/each}
-				</div>
+				{/if}
+			</TableBody>
+		</Table>
+	{/if}
+</div>
+
+<Dialog
+	bind:isOpen={isDialogOpen}
+	title={editingItem ? 'Ubah Konten Dashboard' : 'Tambah Konten Slide'}
+	subtitle={editingItem
+		? `ID: ${editingItem.id} | Mengubah konten slide client`
+		: 'Tambah slide baru'}
+>
+	<form onsubmit={handleSave} class="flex flex-col p-6 space-y-4">
+		<div class="space-y-1.5">
+			<label for="edit-title" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+				>Judul Konten</label
+			>
+			<Input id="edit-title" bind:value={editForm.title} required />
+		</div>
+
+		<div class="space-y-1.5">
+			<label for="edit-desc" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+				>Deskripsi Slide</label
+			>
+			<Textarea id="edit-desc" bind:value={editForm.description} rows={4} required />
+		</div>
+
+		<div class="grid grid-cols-2 gap-4">
+			<div class="space-y-1.5">
+				<label
+					for="edit-category"
+					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Kategori</label
+				>
+				<CategorySelect
+					id="edit-category"
+					bind:value={editForm.category_id}
+					{categories}
+					required
+				/>
 			</div>
 		</div>
-	</section>
-</div>
+
+		<div class="space-y-1.5">
+			<label class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+				>Gambar Slide</label
+			>
+			<ImageUploader
+				bind:value={editForm.media_id}
+				aspectRatio={16 / 9}
+				placeholder="Pilih gambar slide dashboard"
+			/>
+		</div>
+
+		<div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+			<Button variant="outline" onclick={() => (isDialogOpen = false)}>Batal</Button>
+			<Button type="submit">Simpan Perubahan</Button>
+		</div>
+	</form>
+</Dialog>

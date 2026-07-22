@@ -100,7 +100,7 @@
 			category_id: item.category.id,
 			owner_name: item.owner.name,
 			owner_msisdn: item.owner.msisdn || '',
-			media_id: ''
+			media_id: item.media_id ? String(item.media_id) : item.media || ''
 		};
 		isDialogOpen = true;
 	}
@@ -288,7 +288,7 @@
 		? `ID: ${editingItem.id} | Mengubah komoditas desa`
 		: 'Tambah komoditas desa baru'}
 >
-	<form onsubmit={handleSave} class="flex flex-col p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+	<form onsubmit={handleSave} class="flex flex-col p-6 space-y-4">
 		<div class="grid gap-4 md:grid-cols-2">
 			<div class="min-w-0 space-y-1.5">
 				<label

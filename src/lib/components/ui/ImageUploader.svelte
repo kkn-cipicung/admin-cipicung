@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fileToBase64, parseBase64Image } from '../../../utils/base64';
+	import { getMediaUrl } from '../../../utils/media';
 	import { fade, scale as scaleTransition } from 'svelte/transition';
 	import { ImageUp, X, Crop, Upload, AlertCircle } from '@lucide/svelte';
 	import Button from './Button.svelte';
@@ -29,6 +30,8 @@
 	let fileInputEl: HTMLInputElement | undefined = $state();
 
 	let dragCounter = $state(0);
+
+	let displayUrl = $derived(getMediaUrl(value));
 
 	let imageInfo = $derived(() => {
 		if (!value) return null;
@@ -107,7 +110,7 @@
 	}
 
 	function openCrop() {
-		const src = originalDataUrl || value;
+		const src = originalDataUrl || displayUrl || value;
 		if (src) {
 			originalDataUrl = src;
 			isCropOpen = true;
@@ -144,7 +147,7 @@
 	{#if value}
 		<div class="image-uploader-preview group" transition:fade={{ duration: 150 }}>
 			<div class="image-uploader-preview-container">
-				<img src={value} alt="Preview" class="image-uploader-preview-img" />
+				<img src={displayUrl} alt="Preview" class="image-uploader-preview-img" />
 
 				<div class="image-uploader-overlay">
 					<div class="flex items-center gap-2">
@@ -173,7 +176,7 @@
 			<div class="image-uploader-info">
 				<div class="flex items-center gap-2 min-w-0">
 					<div class="image-uploader-thumb">
-						<img src={value} alt="" class="w-full h-full object-cover" />
+						<img src={displayUrl} alt="" class="w-full h-full object-cover" />
 					</div>
 					<div class="min-w-0">
 						<p class="text-[11px] font-bold text-slate-700 truncate">

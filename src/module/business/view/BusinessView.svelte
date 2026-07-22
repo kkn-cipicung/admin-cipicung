@@ -312,7 +312,7 @@
 		: 'Tambah profil UMKM baru'}
 	maxWidth="max-w-2xl"
 >
-	<form onsubmit={handleSave} class="flex flex-col p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+	<form onsubmit={handleSave} class="flex flex-col p-6 space-y-4">
 		<div class="grid gap-4 md:grid-cols-2">
 			<div class="space-y-1.5">
 				<label

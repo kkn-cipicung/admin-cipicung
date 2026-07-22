@@ -22,7 +22,7 @@
 	const mainMenuItems = [
 		{
 			name: 'Dashboard',
-			href: '/dashboard/manage',
+			href: '/dashboard',
 			icon: Sliders
 		},
 		{
