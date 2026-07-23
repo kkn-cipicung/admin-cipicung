@@ -1,5 +1,5 @@
 import api from '../../../lib/axios';
-import type { CreateProfilePayload } from '../_model/payload';
+import type { CreateProfilePayload, ProfileIdPayload } from '../_model/payload';
 import type {
 	EmptyProfileResponse,
 	GovernmentStructureResponse,
@@ -13,8 +13,10 @@ export const createProfile = async (payload: CreateProfilePayload): Promise<Empt
 	(await api.post<EmptyProfileResponse>('/profile/create', payload)).data;
 export const saveProfile = createProfile;
 export const findProfileById = async (): Promise<ProfileResponse> =>
-	(await api.post<ProfileResponse>('/profile/detail', {})).data;
+	(await api.post<ProfileResponse>('/profile/active', {})).data;
 export const getProfile = findProfileById;
+export const getActiveProfile = async (): Promise<ProfileResponse> =>
+	(await api.post<ProfileResponse>('/profile/active', {})).data;
 export const getRegionBoundary = async (): Promise<RegionBoundaryResponse> =>
 	(await api.post<RegionBoundaryResponse>('/profile/region-boundary')).data;
 export const getVisionMission = async (): Promise<VisionMissionResponse> =>
@@ -23,5 +25,7 @@ export const getGovernmentStructure = async (): Promise<GovernmentStructureRespo
 	(await api.post<GovernmentStructureResponse>('/profile/government-structure')).data;
 export const getResourcePotential = async (): Promise<ResourcePotentialResponse> =>
 	(await api.post<ResourcePotentialResponse>('/profile/resource-potential')).data;
+export const activateProfile = async (payload: ProfileIdPayload): Promise<EmptyProfileResponse> =>
+	(await api.post<EmptyProfileResponse>('/profile/activate', payload)).data;
 export const deleteProfile = async (): Promise<EmptyProfileResponse> =>
 	(await api.post<EmptyProfileResponse>('/profile/delete', {})).data;

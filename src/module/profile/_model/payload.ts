@@ -37,3 +37,7 @@ export const ProfilePayloadSchema = z.object({
 export type CreateProfilePayload = z.infer<typeof ProfilePayloadSchema>;
 export const UpdateProfilePayloadSchema = ProfilePayloadSchema;
 export type UpdateProfilePayload = z.infer<typeof UpdateProfilePayloadSchema>;
+export const ProfileIdPayloadSchema = z.object({
+	id: z.number()
+});
+export type ProfileIdPayload = z.infer<typeof ProfileIdPayloadSchema>;
