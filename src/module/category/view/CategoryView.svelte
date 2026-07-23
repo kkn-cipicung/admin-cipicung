@@ -14,6 +14,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import ConfirmDialog from '$lib/components/ui/ConfirmDialog.svelte';
 	import { Plus, Search, Loader2, Pencil, Trash2 } from '@lucide/svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 
@@ -29,6 +30,10 @@
 	let isDialogOpen = $state(false);
 	let editingItem = $state<CategoryData | null>(null);
 	let searchQuery = $state('');
+	let isSaving = $state(false);
+	let isDeleteDialogOpen = $state(false);
+	let isDeleting = $state(false);
+	let deleteTargetId = $state<number | null>(null);
 	let editForm = $state({
 		name: '',
 		type: 'news' as CategoryType
@@ -64,6 +69,8 @@
 
 	const handleSave = async (e: Event) => {
 		e.preventDefault();
+		if (isSaving) return;
+		isSaving = true;
 		try {
 			if (editingItem) {
 				await updateCategory({
@@ -85,20 +92,31 @@
 			const err = error as { apiResponse?: { message?: string }; message?: string };
 			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
 			toast.error({ title: 'Gagal menyimpan kategori', message: msg });
+		} finally {
+			isSaving = false;
 		}
 	};
 
-	const handleDelete = async (id: number) => {
-		if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-			try {
-				await deleteCategory({ id });
-				await queryClient.invalidateQueries({ queryKey: ['categories', 'list'] });
-				toast.success('Kategori berhasil dihapus.');
-			} catch (error) {
-				const err = error as { apiResponse?: { message?: string }; message?: string };
-				const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
-				toast.error({ title: 'Gagal menghapus kategori', message: msg });
-			}
+	const handleDeleteClick = (id: number) => {
+		deleteTargetId = id;
+		isDeleteDialogOpen = true;
+	};
+
+	const confirmDelete = async () => {
+		if (deleteTargetId === null) return;
+		isDeleting = true;
+		try {
+			await deleteCategory({ id: deleteTargetId });
+			await queryClient.invalidateQueries({ queryKey: ['categories', 'list'] });
+			toast.success('Kategori berhasil dihapus.');
+			isDeleteDialogOpen = false;
+			deleteTargetId = null;
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menghapus kategori', message: msg });
+		} finally {
+			isDeleting = false;
 		}
 	};
 
@@ -195,7 +213,7 @@
 										size="icon"
 										class="hover:bg-red-50 hover:text-red-650 hover:border-red-200"
 										title="Hapus Kategori"
-										onclick={() => handleDelete(category.id)}
+										onclick={() => handleDeleteClick(category.id)}
 									>
 										<Trash2 size={14} />
 									</Button>
@@ -243,8 +261,25 @@
 		</div>
 
 		<div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-			<Button variant="outline" onclick={() => (isDialogOpen = false)}>Batal</Button>
-			<Button type="submit">Simpan Perubahan</Button>
+			<Button variant="outline" onclick={() => (isDialogOpen = false)} disabled={isSaving}
+				>Batal</Button
+			>
+			<Button type="submit" disabled={isSaving}>
+				{#if isSaving}
+					<Loader2 size={16} class="animate-spin" />
+					Menyimpan...
+				{:else}
+					Simpan Perubahan
+				{/if}
+			</Button>
 		</div>
 	</form>
 </Dialog>
+
+<ConfirmDialog
+	bind:isOpen={isDeleteDialogOpen}
+	title="Hapus Kategori"
+	description="Apakah Anda yakin ingin menghapus kategori ini? Data yang terkait mungkin akan terpengaruh."
+	isLoading={isDeleting}
+	onConfirm={confirmDelete}
+/>

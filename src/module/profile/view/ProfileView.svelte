@@ -100,36 +100,41 @@
 				phone: data.phone || '',
 				email: data.email || '',
 				vision: data.vision || '',
-				mission: Array.isArray(data.mission) ? data.mission.join('\n') : (data.mission || ''),
+				mission: Array.isArray(data.mission) ? data.mission.join('\n') : data.mission || '',
 				history: data.history || '',
 				description: data.description || '',
 				region: data.region || '',
-				hamlet_one: data.hamlet_one !== undefined && data.hamlet_one !== null ? String(data.hamlet_one) : '',
-				hamlet_two: data.hamlet_two !== undefined && data.hamlet_two !== null ? String(data.hamlet_two) : '',
+				hamlet_one:
+					data.hamlet_one !== undefined && data.hamlet_one !== null ? String(data.hamlet_one) : '',
+				hamlet_two:
+					data.hamlet_two !== undefined && data.hamlet_two !== null ? String(data.hamlet_two) : '',
 				north_border: data.north_border || '',
 				east_border: data.east_border || '',
 				south_border: data.south_border || '',
 				west_border: data.west_border || '',
 				area: data.area || '',
-				latitude: data.latitude !== undefined && data.latitude !== null ? String(data.latitude) : '',
-				longitude: data.longitude !== undefined && data.longitude !== null ? String(data.longitude) : '',
-				headmen: Array.isArray(data.headmen) && data.headmen.length > 0
-					? data.headmen.map((h) => ({
-							name: h.name || '',
-							position: h.position || 'kepala-desa',
-							start_date: h.start_date || '',
-							finish_date: h.finish_date || '',
-							is_active: Boolean(h.is_active)
-					  }))
-					: [
-							{
-								name: '',
-								position: 'kepala-desa',
-								start_date: '',
-								finish_date: '',
-								is_active: true
-							}
-					  ]
+				latitude:
+					data.latitude !== undefined && data.latitude !== null ? String(data.latitude) : '',
+				longitude:
+					data.longitude !== undefined && data.longitude !== null ? String(data.longitude) : '',
+				headmen:
+					Array.isArray(data.headmen) && data.headmen.length > 0
+						? data.headmen.map((h) => ({
+								name: h.name || '',
+								position: h.position || 'kepala-desa',
+								start_date: h.start_date || '',
+								finish_date: h.finish_date || '',
+								is_active: Boolean(h.is_active)
+							}))
+						: [
+								{
+									name: '',
+									position: 'kepala-desa',
+									start_date: '',
+									finish_date: '',
+									is_active: true
+								}
+							]
 			};
 			hasHydrated = true;
 		}
@@ -173,8 +178,14 @@
 			history: form.history || undefined,
 			description: form.description || undefined,
 			region: form.region || undefined,
-			hamlet_one: form.hamlet_one !== '' && form.hamlet_one !== null && form.hamlet_one !== undefined ? Number(form.hamlet_one) : undefined,
-			hamlet_two: form.hamlet_two !== '' && form.hamlet_two !== null && form.hamlet_two !== undefined ? Number(form.hamlet_two) : undefined,
+			hamlet_one:
+				form.hamlet_one !== '' && form.hamlet_one !== null && form.hamlet_one !== undefined
+					? Number(form.hamlet_one)
+					: undefined,
+			hamlet_two:
+				form.hamlet_two !== '' && form.hamlet_two !== null && form.hamlet_two !== undefined
+					? Number(form.hamlet_two)
+					: undefined,
 			north_border: form.north_border || undefined,
 			east_border: form.east_border || undefined,
 			south_border: form.south_border || undefined,
