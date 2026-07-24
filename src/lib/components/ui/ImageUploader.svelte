@@ -10,7 +10,7 @@
 	let {
 		value = $bindable(''),
 		aspectRatio = null,
-		maxSizeMB = 5,
+		maxSizeMB = 10,
 		placeholder = 'Seret gambar ke sini atau klik untuk memilih',
 		disabled = false,
 		class: className = ''
