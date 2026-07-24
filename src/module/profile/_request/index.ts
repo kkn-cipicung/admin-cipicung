@@ -1,8 +1,15 @@
 import api from '../../../lib/axios';
-import type { CreateProfilePayload, ProfileIdPayload } from '../_model/payload';
+import type {
+	CreateOfficialPayload,
+	CreateProfilePayload,
+	ProfileIdPayload,
+	UpdateOfficialPayload
+} from '../_model/payload';
 import type {
 	EmptyProfileResponse,
 	GovernmentStructureResponse,
+	OfficialDetailResponse,
+	OfficialListResponse,
 	ProfileResponse,
 	RegionBoundaryResponse,
 	ResourcePotentialResponse,
@@ -29,3 +36,18 @@ export const activateProfile = async (payload: ProfileIdPayload): Promise<EmptyP
 	(await api.post<EmptyProfileResponse>('/profile/activate', payload)).data;
 export const deleteProfile = async (): Promise<EmptyProfileResponse> =>
 	(await api.post<EmptyProfileResponse>('/profile/delete', {})).data;
+
+export const createOfficial = async (payload: CreateOfficialPayload): Promise<EmptyProfileResponse> =>
+	(await api.post<EmptyProfileResponse>('/profile/official/create', payload)).data;
+
+export const listOfficials = async (payload?: { limit?: number; index?: number }): Promise<OfficialListResponse> =>
+	(await api.post<OfficialListResponse>('/profile/official/list', payload || {})).data;
+
+export const getOfficialDetail = async (payload: { id: number }): Promise<OfficialDetailResponse> =>
+	(await api.post<OfficialDetailResponse>('/profile/official/detail', payload)).data;
+
+export const updateOfficial = async (payload: UpdateOfficialPayload): Promise<EmptyProfileResponse> =>
+	(await api.post<EmptyProfileResponse>('/profile/official/update', payload)).data;
+
+export const deleteOfficial = async (payload: { id: number }): Promise<EmptyProfileResponse> =>
+	(await api.post<EmptyProfileResponse>('/profile/official/delete', payload)).data;

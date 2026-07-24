@@ -6,7 +6,7 @@ export const CreatePotentialPayloadSchema = z.object({
 	title: z.string(),
 	subtitle: z.string().optional(),
 	slug: z.string(),
-	description: z.string(),
+	description: z.string().max(255),
 	location: z
 		.object({
 			latitude: z.number().optional(),
@@ -15,8 +15,6 @@ export const CreatePotentialPayloadSchema = z.object({
 			description: z.string().optional()
 		})
 		.optional(),
-	owner_name: z.string(),
-	owner_msisdn: z.string().optional(),
 	media_id: z.string().nullable().optional()
 });
 export type CreatePotentialPayload = z.infer<typeof CreatePotentialPayloadSchema>;
@@ -35,7 +33,7 @@ export const UpdatePotentialPayloadSchema = z.object({
 	title: z.string(),
 	subtitle: z.string().optional(),
 	slug: z.string(),
-	description: z.string(),
+	description: z.string().max(255),
 	location: z
 		.object({
 			latitude: z.number().optional(),
@@ -44,8 +42,6 @@ export const UpdatePotentialPayloadSchema = z.object({
 			description: z.string().optional()
 		})
 		.optional(),
-	owner_name: z.string(),
-	owner_msisdn: z.string().optional(),
 	media_id: z.string().nullable().optional()
 });
 export type UpdatePotentialPayload = z.infer<typeof UpdatePotentialPayloadSchema>;

@@ -9,7 +9,7 @@ export const PotentialDataSchema = z.object({
 	slug: z.string(),
 	description: z.string(),
 	location: z.object({ id: z.number() }).nullable().optional(),
-	owner: z.object({ name: z.string(), msisdn: z.string().nullable() }),
+	owner: z.object({ name: z.string(), msisdn: z.string().nullable() }).optional().nullable(),
 	media: z.string().optional().nullable(),
 	media_id: z.union([z.number(), z.string()]).optional().nullable(),
 	created_at: z.string()

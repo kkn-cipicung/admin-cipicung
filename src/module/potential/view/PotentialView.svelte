@@ -42,8 +42,7 @@
 			return searchQuery
 				? item.title.toLowerCase().includes(query) ||
 						(item.subtitle || '').toLowerCase().includes(query) ||
-						item.description.toLowerCase().includes(query) ||
-						item.owner.name.toLowerCase().includes(query)
+						item.description.toLowerCase().includes(query)
 				: true;
 		})
 	);
@@ -61,8 +60,6 @@
 		slug: '',
 		description: '',
 		category_id: 0,
-		owner_name: '',
-		owner_msisdn: '',
 		media_id: ''
 	});
 
@@ -78,8 +75,6 @@
 			slug: '',
 			description: '',
 			category_id: getDefaultCategoryId(latestCategories),
-			owner_name: '',
-			owner_msisdn: '',
 			media_id: ''
 		};
 		isDialogOpen = true;
@@ -103,8 +98,6 @@
 			slug: item.slug,
 			description: item.description,
 			category_id: item.category.id,
-			owner_name: item.owner.name,
-			owner_msisdn: item.owner.msisdn || '',
 			media_id: item.media_id ? String(item.media_id) : item.media || ''
 		};
 		isDialogOpen = true;
@@ -124,8 +117,6 @@
 					subtitle: editForm.subtitle,
 					slug: editForm.slug,
 					description: editForm.description,
-					owner_name: editForm.owner_name,
-					owner_msisdn: editForm.owner_msisdn || undefined,
 					media_id: mediaId || null
 				});
 			} else {
@@ -135,8 +126,6 @@
 					subtitle: editForm.subtitle,
 					slug: editForm.slug,
 					description: editForm.description,
-					owner_name: editForm.owner_name,
-					owner_msisdn: editForm.owner_msisdn || undefined,
 					media_id: mediaId || null
 				});
 			}
@@ -204,7 +193,7 @@
 				<Search size={16} />
 			</span>
 			<Input
-				placeholder="Cari potensi atau nama pemilik..."
+				placeholder="Cari potensi..."
 				class="pl-9 bg-slate-50/50"
 				bind:value={searchQuery}
 			/>
@@ -228,14 +217,13 @@
 					<TableHead>Slug & Subtitle</TableHead>
 					<TableHead>Deskripsi</TableHead>
 					<TableHead class="text-center">Kategori</TableHead>
-					<TableHead>Pengelola & Kontak</TableHead>
 					<TableHead class="text-right">Aksi</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
 				{#if filteredPotentials.length === 0}
 					<TableRow>
-						<TableCell colspan={8} class="text-center py-8 text-slate-400 font-medium">
+						<TableCell colspan={7} class="text-center py-8 text-slate-400 font-medium">
 							Belum ada data potensi & UMKM.
 						</TableCell>
 					</TableRow>
@@ -263,12 +251,6 @@
 								>
 									{item.category.name || getCategoryName(item.category.id)}
 								</span>
-							</TableCell>
-							<TableCell class="text-xs">
-								<span class="block font-bold text-slate-900">{item.owner.name}</span>
-								<span class="block text-slate-400 text-[11px] font-semibold mt-0.5"
-									>{item.owner.msisdn}</span
-								>
 							</TableCell>
 							<TableCell class="text-right whitespace-nowrap">
 								<div class="flex items-center justify-end gap-2">
@@ -334,7 +316,7 @@
 			<label for="edit-desc" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
 				>Deskripsi</label
 			>
-			<Textarea id="edit-desc" bind:value={editForm.description} rows={3} required />
+			<Textarea id="edit-desc" bind:value={editForm.description} rows={3} maxlength={255} required />
 		</div>
 
 		<div class="space-y-1.5">
@@ -358,24 +340,6 @@
 			</div>
 		</div>
 
-		<div class="grid gap-4 md:grid-cols-2">
-			<div class="min-w-0 space-y-1.5">
-				<label
-					for="edit-owner"
-					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-					>Nama Pengelola</label
-				>
-				<Input id="edit-owner" bind:value={editForm.owner_name} required />
-			</div>
-			<div class="min-w-0 space-y-1.5">
-				<label
-					for="edit-msisdn"
-					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-					>No. Kontak (MSISDN)</label
-				>
-				<Input id="edit-msisdn" bind:value={editForm.owner_msisdn} />
-			</div>
-		</div>
 
 		<div class="space-y-1.5">
 			<span class="block text-xs font-bold text-slate-500 uppercase tracking-wide"

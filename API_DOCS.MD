@@ -641,13 +641,11 @@ Payload potential yang dipakai create/update:
 		"title": "Lokasi Kerajinan",
 		"description": "Dusun 1"
 	},
-	"owner_name": "Budi",
-	"owner_msisdn": "08123456789",
 	"media_id": "data:image/jpeg;base64,/9j/4AAQSk..."
 }
 ```
 
-Wajib: `category_id > 0`, `title`, `slug`, `description`, `owner_name`. `subtitle`, `location_id`, `location`, `owner_msisdn`, `media_id` opsional. Jika `location` dikirim, latitude harus -90..90 dan longitude -180..180. `media_id` adalah base64/data URL atau `null`; `uploaded_by` berasal dari token.
+Wajib: `category_id > 0`, `title`, `slug`, `description`. `subtitle`, `location_id`, `location`, `media_id` opsional. Jika `location` dikirim, latitude harus -90..90 dan longitude -180..180. `media_id` adalah base64/data URL atau `null`; `uploaded_by` berasal dari token.
 
 ### `POST /potential/create` — Protected
 

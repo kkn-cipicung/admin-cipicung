@@ -33,7 +33,7 @@
 	}));
 
 	let articles = $derived(articlesQuery.data?.data || []);
-	let categories = $derived((categoriesQuery.data?.data || []).filter((c) => c.type === 'news'));
+	let categories = $derived(categoriesQuery.data?.data || []);
 
 	let selectedCategoryId = $state<number | string>('');
 	let searchQuery = $state('');
@@ -54,8 +54,9 @@
 
 	let filteredArticles = $derived(
 		articles.filter((article) => {
+			const catId = article.category_id || article.category?.id;
 			const matchesCategory = selectedCategoryId
-				? article.category.id === Number(selectedCategoryId)
+				? catId === Number(selectedCategoryId)
 				: true;
 			const matchesSearch = searchQuery
 				? article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -68,7 +69,7 @@
 	let isLoading = $derived(articlesQuery.isPending || categoriesQuery.isPending);
 
 	const getNewsCategories = (items = categoriesQuery.data?.data || []) => {
-		return items.filter((category) => category.type === 'news');
+		return items;
 	};
 
 	const getDefaultCategoryId = (items = categories) => {

@@ -3,6 +3,8 @@ import { BaseResponseSchema } from '../../../utils/types';
 
 export const NewsDataSchema = z.object({
 	id: z.number(),
+	category_id: z.number().optional().nullable(),
+	category_name: z.string().optional().nullable(),
 	category: z.object({ id: z.number(), name: z.string() }),
 	uploader: z.object({ id: z.number(), name: z.string() }),
 	title: z.string(),

@@ -63,3 +63,24 @@ export const ResourcePotentialResponseSchema = BaseResponseSchema(
 	z.object({ title: z.string(), detail: z.string() })
 );
 export type ResourcePotentialResponse = z.infer<typeof ResourcePotentialResponseSchema>;
+
+export const OfficialDataSchema = z.object({
+	id: z.number(),
+	village_id: z.number().optional(),
+	name: z.string(),
+	position: z.string(),
+	phone: z.string().optional(),
+	email: z.string().optional(),
+	description: z.string().optional(),
+	order_number: z.number().optional(),
+	is_active: z.boolean().optional(),
+	start_date: z.string().nullable().optional(),
+	finish_date: z.string().nullable().optional(),
+	created_at: z.string().optional(),
+	updated_at: z.string().optional()
+});
+export type OfficialData = z.infer<typeof OfficialDataSchema>;
+export const OfficialListResponseSchema = BaseResponseSchema(z.array(OfficialDataSchema));
+export type OfficialListResponse = z.infer<typeof OfficialListResponseSchema>;
+export const OfficialDetailResponseSchema = BaseResponseSchema(OfficialDataSchema);
+export type OfficialDetailResponse = z.infer<typeof OfficialDetailResponseSchema>;
