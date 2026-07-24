@@ -78,7 +78,10 @@
 
 		<div class="grid gap-5 md:grid-cols-2">
 			<div class="space-y-1.5">
-				<label for="map-elevation" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">
+				<label
+					for="map-elevation"
+					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+				>
 					Elevasi (mdpl)
 				</label>
 				<Input
@@ -90,7 +93,10 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label for="map-coordinate" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">
+				<label
+					for="map-coordinate"
+					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+				>
 					Koordinat Lokasi
 				</label>
 				<Input
@@ -117,10 +123,14 @@
 
 	<aside class="space-y-4">
 		<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
-			<h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Ringkasan Data Aktif</h3>
+			<h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">
+				Ringkasan Data Aktif
+			</h3>
 			<div class="space-y-3.5">
 				<div class="flex items-start gap-3">
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+					<div
+						class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 shrink-0"
+					>
 						<Mountain size={18} />
 					</div>
 					<div>
@@ -130,7 +140,9 @@
 				</div>
 
 				<div class="flex items-start gap-3">
-					<div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 shrink-0">
+					<div
+						class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 shrink-0"
+					>
 						<MapPin size={18} />
 					</div>
 					<div>

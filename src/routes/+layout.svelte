@@ -102,7 +102,6 @@
 						>
 							{greeting}, Admin 👋
 						</span>
-
 					</div>
 				</header>
 

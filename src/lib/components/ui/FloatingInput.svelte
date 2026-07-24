@@ -20,7 +20,11 @@
 	}: Props = $props();
 
 	const fieldId = $derived(
-		id ?? `field-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`
+		id ??
+			`field-${label
+				.toLowerCase()
+				.replace(/[^a-z0-9]+/g, '-')
+				.replace(/(^-|-$)/g, '')}`
 	);
 </script>
 

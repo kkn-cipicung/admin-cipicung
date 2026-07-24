@@ -20,7 +20,11 @@
 	}: Props = $props();
 
 	const fieldId = $derived(
-		id ?? `field-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`
+		id ??
+			`field-${label
+				.toLowerCase()
+				.replace(/[^a-z0-9]+/g, '-')
+				.replace(/(^-|-$)/g, '')}`
 	);
 </script>
 
@@ -35,8 +39,7 @@
 			placeholder-transparent transition-colors
 			focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20
 			${className}`}
-		{...rest}
-	></textarea>
+		{...rest}></textarea>
 	<label
 		for={fieldId}
 		class="pointer-events-none absolute left-3 top-2.5 text-sm font-medium text-slate-400 transition-all duration-150 ease-out

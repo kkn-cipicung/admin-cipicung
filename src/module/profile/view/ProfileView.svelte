@@ -237,8 +237,18 @@
 			<FloatingInput bind:value={form.south_border} label="Batas selatan" />
 			<FloatingInput bind:value={form.west_border} label="Batas barat" />
 			<FloatingInput bind:value={form.area} label="Luas wilayah" />
-			<FloatingInput type="number" step="any" bind:value={form.latitude} label="Latitude (-6.6075°)" />
-			<FloatingInput type="number" step="any" bind:value={form.longitude} label="Longitude (107.37667°)" />
+			<FloatingInput
+				type="number"
+				step="any"
+				bind:value={form.latitude}
+				label="Latitude (-6.6075°)"
+			/>
+			<FloatingInput
+				type="number"
+				step="any"
+				bind:value={form.longitude}
+				label="Longitude (107.37667°)"
+			/>
 		</div>
 		<FloatingInput bind:value={form.address} label="Alamat" required />
 		<FloatingTextarea bind:value={form.description} label="Deskripsi desa" rows={3} />
