@@ -2,10 +2,10 @@
 	import { createContact, getContactDetail, updateContact } from '../_request';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import Button from '$lib/components/ui/Button.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
+	import FloatingInput from '$lib/components/ui/FloatingInput.svelte';
 	import { Loader2 } from '@lucide/svelte';
 	import { toast } from '$lib/stores/toast.svelte';
-	import Textarea from '$lib/components/ui/Textarea.svelte';
+	import FloatingTextarea from '$lib/components/ui/FloatingTextarea.svelte';
 
 	const queryClient = useQueryClient();
 	const contactQuery = createQuery(() => ({
@@ -75,15 +75,15 @@
 			</p>
 		</div>
 		<div class="grid gap-4 md:grid-cols-2">
-			<Input bind:value={form.name} placeholder="Nama kantor" required />
-			<Input bind:value={form.province} placeholder="Provinsi" required />
-			<Input bind:value={form.regency} placeholder="Kabupaten" required />
-			<Input bind:value={form.district} placeholder="Kecamatan" required />
-			<Input bind:value={form.postal_code} placeholder="Kode pos" required />
-			<Input bind:value={form.phone} placeholder="Telepon" required />
-			<Input bind:value={form.email} placeholder="Email" required />
+			<FloatingInput bind:value={form.name} label="Nama kantor" required />
+			<FloatingInput bind:value={form.province} label="Provinsi" required />
+			<FloatingInput bind:value={form.regency} label="Kabupaten" required />
+			<FloatingInput bind:value={form.district} label="Kecamatan" required />
+			<FloatingInput bind:value={form.postal_code} label="Kode pos" required />
+			<FloatingInput bind:value={form.phone} label="Telepon" required />
+			<FloatingInput bind:value={form.email} label="Email" required />
 		</div>
-		<Textarea rows={3} bind:value={form.address} placeholder="Alamat" required />
+		<FloatingTextarea rows={3} bind:value={form.address} label="Alamat" required />
 		<div class="flex justify-end">
 			<Button type="submit" disabled={isSaving}
 				>{isSaving ? 'Menyimpan...' : 'Simpan Kontak'}</Button

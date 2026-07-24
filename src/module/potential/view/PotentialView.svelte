@@ -15,6 +15,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import ConfirmDialog from '$lib/components/ui/ConfirmDialog.svelte';
 	import ImageUploader from '$lib/components/ui/ImageUploader.svelte';
 	import CategorySelect from '$lib/components/ui/CategorySelect.svelte';
 	import MediaThumbnail from '$lib/components/ui/MediaThumbnail.svelte';
@@ -50,6 +51,10 @@
 	let isDialogOpen = $state(false);
 	let editingItem = $state<PotentialData | null>(null);
 	let isPreparingForm = $state(false);
+	let isSaving = $state(false);
+	let isDeleteDialogOpen = $state(false);
+	let isDeleting = $state(false);
+	let deleteTargetId = $state<number | null>(null);
 	let editForm = $state({
 		title: '',
 		subtitle: '',
@@ -107,6 +112,8 @@
 
 	async function handleSave(e: Event) {
 		e.preventDefault();
+		if (isSaving) return;
+		isSaving = true;
 		const mediaId = editForm.media_id.trim();
 		try {
 			if (editingItem) {
@@ -141,20 +148,31 @@
 			const err = error as { apiResponse?: { message?: string }; message?: string };
 			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
 			toast.error({ title: 'Gagal menyimpan potensi', message: msg });
+		} finally {
+			isSaving = false;
 		}
 	}
 
-	async function handleDelete(id: number) {
-		if (confirm('Apakah Anda yakin ingin menghapus potensi/UMKM ini?')) {
-			try {
-				await deletePotential({ id });
-				await queryClient.invalidateQueries({ queryKey: ['potentials', 'list'] });
-				toast.success('Potensi berhasil dihapus.');
-			} catch (error) {
-				const err = error as { apiResponse?: { message?: string }; message?: string };
-				const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
-				toast.error({ title: 'Gagal menghapus potensi', message: msg });
-			}
+	function handleDeleteClick(id: number) {
+		deleteTargetId = id;
+		isDeleteDialogOpen = true;
+	}
+
+	async function confirmDelete() {
+		if (deleteTargetId === null) return;
+		isDeleting = true;
+		try {
+			await deletePotential({ id: deleteTargetId });
+			await queryClient.invalidateQueries({ queryKey: ['potentials', 'list'] });
+			toast.success('Potensi berhasil dihapus.');
+			isDeleteDialogOpen = false;
+			deleteTargetId = null;
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menghapus potensi', message: msg });
+		} finally {
+			isDeleting = false;
 		}
 	}
 </script>
@@ -267,7 +285,7 @@
 										size="icon"
 										class="hover:bg-red-50 hover:text-red-650 hover:border-red-200"
 										title="Hapus Potensi"
-										onclick={() => handleDelete(item.id)}
+										onclick={() => handleDeleteClick(item.id)}
 									>
 										<Trash2 size={14} />
 									</Button>
@@ -360,8 +378,8 @@
 		</div>
 
 		<div class="space-y-1.5">
-			<label class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-				>Gambar Potensi</label
+			<span class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+				>Gambar Potensi</span
 			>
 			<ImageUploader
 				bind:value={editForm.media_id}
@@ -371,8 +389,25 @@
 		</div>
 
 		<div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 shrink-0">
-			<Button variant="outline" onclick={() => (isDialogOpen = false)}>Batal</Button>
-			<Button type="submit">Simpan Perubahan</Button>
+			<Button variant="outline" onclick={() => (isDialogOpen = false)} disabled={isSaving}
+				>Batal</Button
+			>
+			<Button type="submit" disabled={isSaving}>
+				{#if isSaving}
+					<Loader2 size={16} class="animate-spin" />
+					Menyimpan...
+				{:else}
+					Simpan Perubahan
+				{/if}
+			</Button>
 		</div>
 	</form>
 </Dialog>
+
+<ConfirmDialog
+	bind:isOpen={isDeleteDialogOpen}
+	title="Hapus Potensi/UMKM"
+	description="Apakah Anda yakin ingin menghapus potensi/UMKM ini? Tindakan ini tidak dapat dibatalkan."
+	isLoading={isDeleting}
+	onConfirm={confirmDelete}
+/>

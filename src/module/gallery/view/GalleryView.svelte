@@ -11,6 +11,7 @@
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import ConfirmDialog from '$lib/components/ui/ConfirmDialog.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import ImageUploader from '$lib/components/ui/ImageUploader.svelte';
@@ -42,6 +43,10 @@
 	let searchQuery = $state('');
 	let isDialogOpen = $state(false);
 	let editingItem = $state<GalleryListItem | null>(null);
+	let isSaving = $state(false);
+	let isDeleteDialogOpen = $state(false);
+	let isDeleting = $state(false);
+	let deleteTargetId = $state<number | null>(null);
 	let form = $state({ title: '', description: '', category_id: 0, media_id: '' });
 	let filteredItems = $derived(
 		items.filter((item) => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -78,6 +83,8 @@
 
 	async function save(event: Event) {
 		event.preventDefault();
+		if (isSaving) return;
+		isSaving = true;
 		const payload = {
 			title: form.title,
 			description: form.description,
@@ -94,19 +101,31 @@
 			const err = error as { apiResponse?: { message?: string }; message?: string };
 			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
 			toast.error({ title: 'Gagal menyimpan galeri', message: msg });
+		} finally {
+			isSaving = false;
 		}
 	}
 
-	async function remove(id: number) {
-		if (!confirm('Apakah Anda yakin ingin menghapus galeri ini?')) return;
+	function removeClick(id: number) {
+		deleteTargetId = id;
+		isDeleteDialogOpen = true;
+	}
+
+	async function confirmRemove() {
+		if (deleteTargetId === null) return;
+		isDeleting = true;
 		try {
-			await deleteGallery({ id });
+			await deleteGallery({ id: deleteTargetId });
 			await queryClient.invalidateQueries({ queryKey: ['galleries', 'list'] });
 			toast.success('Galeri berhasil dihapus.');
+			isDeleteDialogOpen = false;
+			deleteTargetId = null;
 		} catch (error) {
 			const err = error as { apiResponse?: { message?: string }; message?: string };
 			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
 			toast.error({ title: 'Gagal menghapus galeri', message: msg });
+		} finally {
+			isDeleting = false;
 		}
 	}
 </script>
@@ -156,7 +175,7 @@
 							<Button variant="outline" size="icon" onclick={() => openEdit(item)}
 								><Pencil size={14} /></Button
 							>
-							<Button variant="outline" size="icon" onclick={() => remove(item.id)}
+							<Button variant="outline" size="icon" onclick={() => removeClick(item.id)}
 								><Trash2 size={14} /></Button
 							>
 						</TableCell>
@@ -173,19 +192,68 @@
 	{/if}
 </div>
 
-<Dialog bind:isOpen={isDialogOpen} title={editingItem ? 'Ubah Galeri' : 'Tambah Galeri'}>
+<Dialog
+	bind:isOpen={isDialogOpen}
+	title={editingItem ? 'Ubah Galeri' : 'Tambah Galeri'}
+	subtitle={editingItem
+		? `ID: ${editingItem.id} | Mengubah item galeri`
+		: 'Tambah item galeri baru'}
+>
 	<form onsubmit={save} class="space-y-4 p-6">
-		<Input bind:value={form.title} placeholder="Judul" required />
-		<Textarea bind:value={form.description} placeholder="Deskripsi" required />
-		<CategorySelect bind:value={form.category_id} {categories} required />
-		<ImageUploader
-			bind:value={form.media_id}
-			aspectRatio={4 / 3}
-			placeholder="Pilih gambar galeri"
-		/>
+		<div class="space-y-1.5">
+			<label
+				for="gallery-title"
+				class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Judul</label
+			>
+			<Input id="gallery-title" bind:value={form.title} placeholder="Judul galeri" required />
+		</div>
+		<div class="space-y-1.5">
+			<label
+				for="gallery-desc"
+				class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Deskripsi</label
+			>
+			<Textarea
+				id="gallery-desc"
+				bind:value={form.description}
+				placeholder="Deskripsi galeri"
+				required
+			/>
+		</div>
+		<div class="space-y-1.5">
+			<label
+				for="gallery-category"
+				class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Kategori</label
+			>
+			<CategorySelect id="gallery-category" bind:value={form.category_id} {categories} required />
+		</div>
+		<div class="space-y-1.5">
+			<span class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Gambar</span>
+			<ImageUploader
+				bind:value={form.media_id}
+				aspectRatio={4 / 3}
+				placeholder="Pilih gambar galeri"
+			/>
+		</div>
 		<div class="flex justify-end gap-3 border-t pt-4">
-			<Button variant="outline" onclick={() => (isDialogOpen = false)}>Batal</Button>
-			<Button type="submit">Simpan</Button>
+			<Button variant="outline" onclick={() => (isDialogOpen = false)} disabled={isSaving}
+				>Batal</Button
+			>
+			<Button type="submit" disabled={isSaving}>
+				{#if isSaving}
+					<Loader2 size={16} class="animate-spin" />
+					Menyimpan...
+				{:else}
+					Simpan
+				{/if}
+			</Button>
 		</div>
 	</form>
 </Dialog>
+
+<ConfirmDialog
+	bind:isOpen={isDeleteDialogOpen}
+	title="Hapus Galeri"
+	description="Apakah Anda yakin ingin menghapus item galeri ini? Tindakan ini tidak dapat dibatalkan."
+	isLoading={isDeleting}
+	onConfirm={confirmRemove}
+/>

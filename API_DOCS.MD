@@ -370,6 +370,12 @@ Payload: tidak ada.
 
 Response `200`: sama seperti `/map/detail`, dengan message `Active map retrieved successfully`.
 
+### `POST /map/list`
+
+Payload: tidak ada.
+
+Response `200`: envelope dengan message `Maps retrieved successfully` dan `data` berupa array objek map (dengan `id`, `elevation`, `coordinate`, `hamlet_one`, `hamlet_two`, `population`, `is_active`).
+
 ### `POST /map/update` — Protected
 
 Payload (`id` wajib; field lainnya boleh kosong):

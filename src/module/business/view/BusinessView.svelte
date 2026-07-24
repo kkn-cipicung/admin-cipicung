@@ -15,6 +15,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import ConfirmDialog from '$lib/components/ui/ConfirmDialog.svelte';
 	import CategorySelect from '$lib/components/ui/CategorySelect.svelte';
 	import { Loader2, Pencil, Phone, Plus, Search, Trash2 } from '@lucide/svelte';
 	import { toast } from '$lib/stores/toast.svelte';
@@ -39,6 +40,10 @@
 
 	let isDialogOpen = $state(false);
 	let editingItem = $state<BusinessData | null>(null);
+	let isSaving = $state(false);
+	let isDeleteDialogOpen = $state(false);
+	let isDeleting = $state(false);
+	let deleteTargetId = $state<number | null>(null);
 	let editForm = $state({
 		category_id: 0,
 		owner_name: '',
@@ -103,6 +108,8 @@
 
 	async function handleSave(e: Event) {
 		e.preventDefault();
+		if (isSaving) return;
+		isSaving = true;
 
 		const optionalInstagram = editForm.instagram.trim() || null;
 		const optionalFacebook = editForm.facebook.trim() || null;
@@ -141,20 +148,31 @@
 			const err = error as { apiResponse?: { message?: string }; message?: string };
 			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
 			toast.error({ title: 'Gagal menyimpan bisnis', message: msg });
+		} finally {
+			isSaving = false;
 		}
 	}
 
-	async function handleDelete(id: number) {
-		if (confirm('Apakah Anda yakin ingin menghapus data bisnis ini?')) {
-			try {
-				await deleteBusiness({ id });
-				await queryClient.invalidateQueries({ queryKey: ['businesses', 'list'] });
-				toast.success('Data bisnis berhasil dihapus.');
-			} catch (error) {
-				const err = error as { apiResponse?: { message?: string }; message?: string };
-				const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
-				toast.error({ title: 'Gagal menghapus bisnis', message: msg });
-			}
+	function handleDeleteClick(id: number) {
+		deleteTargetId = id;
+		isDeleteDialogOpen = true;
+	}
+
+	async function confirmDelete() {
+		if (deleteTargetId === null) return;
+		isDeleting = true;
+		try {
+			await deleteBusiness({ id: deleteTargetId });
+			await queryClient.invalidateQueries({ queryKey: ['businesses', 'list'] });
+			toast.success('Data bisnis berhasil dihapus.');
+			isDeleteDialogOpen = false;
+			deleteTargetId = null;
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menghapus bisnis', message: msg });
+		} finally {
+			isDeleting = false;
 		}
 	}
 
@@ -243,7 +261,7 @@
 					{#each filteredBusinesses as business, index (business.id)}
 						<TableRow>
 							<TableCell class="text-center font-bold text-slate-400">{index + 1}</TableCell>
-							<TableCell class="font-bold text-slate-900 max-w-[12rem] truncate">
+							<TableCell class="font-bold text-slate-900 max-w-48 truncate">
 								{business.business_name}
 							</TableCell>
 							<TableCell class="text-xs">
@@ -258,7 +276,7 @@
 							<TableCell class="max-w-xs text-xs text-slate-500 line-clamp-1 py-5">
 								{business.description}
 							</TableCell>
-							<TableCell class="max-w-[14rem] text-xs text-slate-500 line-clamp-1 py-5">
+							<TableCell class="max-w-56 text-xs text-slate-500 line-clamp-1 py-5">
 								{business.address}
 							</TableCell>
 							<TableCell class="text-center">
@@ -290,7 +308,7 @@
 										size="icon"
 										class="hover:bg-red-50 hover:text-red-650 hover:border-red-200"
 										title="Hapus Bisnis"
-										onclick={() => handleDelete(business.id)}
+										onclick={() => handleDeleteClick(business.id)}
 									>
 										<Trash2 size={14} />
 									</Button>
@@ -386,8 +404,25 @@
 		</div>
 
 		<div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 shrink-0">
-			<Button variant="outline" onclick={() => (isDialogOpen = false)}>Batal</Button>
-			<Button type="submit">Simpan Perubahan</Button>
+			<Button variant="outline" onclick={() => (isDialogOpen = false)} disabled={isSaving}
+				>Batal</Button
+			>
+			<Button type="submit" disabled={isSaving}>
+				{#if isSaving}
+					<Loader2 size={16} class="animate-spin" />
+					Menyimpan...
+				{:else}
+					Simpan Perubahan
+				{/if}
+			</Button>
 		</div>
 	</form>
 </Dialog>
+
+<ConfirmDialog
+	bind:isOpen={isDeleteDialogOpen}
+	title="Hapus Data Bisnis"
+	description="Apakah Anda yakin ingin menghapus data bisnis ini? Tindakan ini tidak dapat dibatalkan."
+	isLoading={isDeleting}
+	onConfirm={confirmDelete}
+/>
