@@ -9,8 +9,8 @@
 	} from '../_request';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import Button from '$lib/components/ui/Button.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
-	import Textarea from '$lib/components/ui/Textarea.svelte';
+	import FloatingInput from '$lib/components/ui/FloatingInput.svelte';
+	import FloatingTextarea from '$lib/components/ui/FloatingTextarea.svelte';
 	import { Loader2, Plus, Trash2 } from '@lucide/svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 
@@ -104,19 +104,15 @@
 				history: data.history || '',
 				description: data.description || '',
 				region: data.region || '',
-				hamlet_one:
-					data.hamlet_one !== undefined && data.hamlet_one !== null ? String(data.hamlet_one) : '',
-				hamlet_two:
-					data.hamlet_two !== undefined && data.hamlet_two !== null ? String(data.hamlet_two) : '',
+				hamlet_one: data.hamlet_one ? String(data.hamlet_one) : '',
+				hamlet_two: data.hamlet_two ? String(data.hamlet_two) : '',
 				north_border: data.north_border || '',
 				east_border: data.east_border || '',
 				south_border: data.south_border || '',
 				west_border: data.west_border || '',
 				area: data.area || '',
-				latitude:
-					data.latitude !== undefined && data.latitude !== null ? String(data.latitude) : '',
-				longitude:
-					data.longitude !== undefined && data.longitude !== null ? String(data.longitude) : '',
+				latitude: data.latitude ? String(data.latitude) : '',
+				longitude: data.longitude ? String(data.longitude) : '',
 				headmen:
 					Array.isArray(data.headmen) && data.headmen.length > 0
 						? data.headmen.map((h) => ({
@@ -226,29 +222,29 @@
 			</p>
 		</div>
 		<div class="grid gap-4 md:grid-cols-3">
-			<Input bind:value={form.name} placeholder="Nama desa" required />
-			<Input bind:value={form.province} placeholder="Provinsi" required />
-			<Input bind:value={form.regency} placeholder="Kabupaten" required />
-			<Input bind:value={form.district} placeholder="Kecamatan" required />
-			<Input bind:value={form.postal_code} placeholder="Kode pos" />
-			<Input bind:value={form.phone} placeholder="Telepon" />
-			<Input bind:value={form.email} placeholder="Email" />
-			<Input bind:value={form.region} placeholder="Wilayah" />
-			<Input bind:value={form.hamlet_one} placeholder="Dusun 1" />
-			<Input bind:value={form.hamlet_two} placeholder="Dusun 2" />
-			<Input bind:value={form.north_border} placeholder="Batas utara" />
-			<Input bind:value={form.east_border} placeholder="Batas timur" />
-			<Input bind:value={form.south_border} placeholder="Batas selatan" />
-			<Input bind:value={form.west_border} placeholder="Batas barat" />
-			<Input bind:value={form.area} placeholder="Luas wilayah" />
-			<Input bind:value={form.latitude} placeholder="Latitude" />
-			<Input bind:value={form.longitude} placeholder="Longitude" />
+			<FloatingInput bind:value={form.name} label="Nama desa" required />
+			<FloatingInput bind:value={form.province} label="Provinsi" required />
+			<FloatingInput bind:value={form.regency} label="Kabupaten" required />
+			<FloatingInput bind:value={form.district} label="Kecamatan" required />
+			<FloatingInput bind:value={form.postal_code} label="Kode pos" />
+			<FloatingInput bind:value={form.phone} label="Telepon" />
+			<FloatingInput bind:value={form.email} label="Email" />
+			<FloatingInput bind:value={form.region} label="Wilayah" />
+			<FloatingInput type="number" bind:value={form.hamlet_one} label="Populasi Dusun 1" />
+			<FloatingInput type="number" bind:value={form.hamlet_two} label="Populasi Dusun 2" />
+			<FloatingInput bind:value={form.north_border} label="Batas utara" />
+			<FloatingInput bind:value={form.east_border} label="Batas timur" />
+			<FloatingInput bind:value={form.south_border} label="Batas selatan" />
+			<FloatingInput bind:value={form.west_border} label="Batas barat" />
+			<FloatingInput bind:value={form.area} label="Luas wilayah" />
+			<FloatingInput type="number" step="any" bind:value={form.latitude} label="Latitude (-6.6075°)" />
+			<FloatingInput type="number" step="any" bind:value={form.longitude} label="Longitude (107.37667°)" />
 		</div>
-		<Input bind:value={form.address} placeholder="Alamat" required />
-		<Textarea bind:value={form.description} placeholder="Deskripsi desa" rows={3} />
-		<Textarea bind:value={form.history} placeholder="Sejarah" rows={3} />
-		<Textarea bind:value={form.vision} placeholder="Visi" rows={3} />
-		<Textarea bind:value={form.mission} placeholder="Misi, satu baris per poin" rows={5} />
+		<FloatingInput bind:value={form.address} label="Alamat" required />
+		<FloatingTextarea bind:value={form.description} label="Deskripsi desa" rows={3} />
+		<FloatingTextarea bind:value={form.history} label="Sejarah" rows={3} />
+		<FloatingTextarea bind:value={form.vision} label="Visi" rows={3} />
+		<FloatingTextarea bind:value={form.mission} label="Misi, satu baris per poin" rows={5} />
 
 		<section class="space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
 			<div class="flex items-center justify-between gap-3">
@@ -285,10 +281,10 @@
 						</div>
 
 						<div class="grid gap-4 md:grid-cols-2">
-							<Input bind:value={headman.name} placeholder="Nama kepala desa" />
-							<Input bind:value={headman.position} placeholder="Jabatan" />
-							<Input type="date" bind:value={headman.start_date} placeholder="Tanggal mulai" />
-							<Input type="date" bind:value={headman.finish_date} placeholder="Tanggal selesai" />
+							<FloatingInput bind:value={headman.name} label="Nama kepala desa" />
+							<FloatingInput bind:value={headman.position} label="Jabatan" />
+							<FloatingInput type="date" bind:value={headman.start_date} label="Tanggal mulai" />
+							<FloatingInput type="date" bind:value={headman.finish_date} label="Tanggal selesai" />
 						</div>
 
 						<label class="mt-4 flex items-center gap-2 text-xs font-bold text-slate-600">

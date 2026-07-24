@@ -7,7 +7,7 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { QueryClientProvider } from '@tanstack/svelte-query';
-	import { Menu, Calendar, Bell } from '@lucide/svelte';
+	import { Menu } from '@lucide/svelte';
 
 	let { children } = $props();
 
@@ -34,12 +34,15 @@
 		return matchedKey ? pageTitles[matchedKey] : 'Halaman Utama';
 	}
 
-	const currentDate = new Date().toLocaleDateString('id-ID', {
-		weekday: 'long',
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric'
-	});
+	function getGreeting() {
+		const hour = new Date().getHours();
+		if (hour < 10) return 'Selamat Pagi';
+		if (hour < 15) return 'Selamat Siang';
+		if (hour < 18) return 'Selamat Sore';
+		return 'Selamat Malam';
+	}
+
+	const greeting = getGreeting();
 
 	$effect(() => {
 		const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -97,18 +100,9 @@
 						<span
 							class="hidden md:flex items-center gap-2 text-xs font-semibold text-abuhijau-700 bg-sage-50/50 border border-sage-200/60 rounded-full px-4 py-1.5 shadow-sm"
 						>
-							<Calendar size={14} class="text-abuhijau-600" />
-							{currentDate}
+							{greeting}, Admin 👋
 						</span>
 
-						<button
-							class="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-						>
-							<Bell size={20} />
-							<span
-								class="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-blue-600 ring-2 ring-white"
-							></span>
-						</button>
 					</div>
 				</header>
 
