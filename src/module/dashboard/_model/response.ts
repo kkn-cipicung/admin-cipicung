@@ -31,3 +31,24 @@ export type DeleteDashboardResponse = z.infer<typeof DeleteDashboardResponseSche
 
 export const ActivateDashboardResponseSchema = BaseResponseSchema(z.null());
 export type ActivateDashboardResponse = z.infer<typeof ActivateDashboardResponseSchema>;
+
+export const DashboardOverviewDataSchema = z.object({
+	title: z.string(),
+	description: z.string(),
+	media: z.string().optional().nullable(),
+	area: z.string(),
+	population: z.number(),
+	total_family: z.number(),
+	total_hamlet: z.number(),
+	total_news: z.number(),
+	total_potential: z.number()
+});
+export type DashboardOverviewData = z.infer<typeof DashboardOverviewDataSchema>;
+
+export const CreateDashboardOverviewResponseSchema = BaseResponseSchema(
+	DashboardOverviewDataSchema
+);
+export type CreateDashboardOverviewResponse = z.infer<typeof CreateDashboardOverviewResponseSchema>;
+
+export const FindDashboardOverviewResponseSchema = BaseResponseSchema(DashboardOverviewDataSchema);
+export type FindDashboardOverviewResponse = z.infer<typeof FindDashboardOverviewResponseSchema>;

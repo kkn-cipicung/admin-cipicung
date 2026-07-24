@@ -5,7 +5,9 @@
 		createDashboard,
 		updateDashboard,
 		deleteDashboard,
-		activateDashboard
+		activateDashboard,
+		getDashboardOverview,
+		createDashboardOverview
 	} from '../_request';
 	import { listCategories } from '../../category/_request';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
@@ -36,6 +38,10 @@
 		queryKey: ['categories', 'list', 'dashboard'],
 		queryFn: () => listCategories()
 	}));
+	const overviewQuery = createQuery(() => ({
+		queryKey: ['dashboard', 'overview'],
+		queryFn: () => getDashboardOverview()
+	}));
 
 	let dashboardItems = $derived(dashboardsQuery.data?.data || []);
 	let categories = $derived(
@@ -53,6 +59,58 @@
 		category_id: 1,
 		media_id: ''
 	});
+
+	let overviewForm = $state({
+		title: '',
+		description: '',
+		media_id: '',
+		area: '',
+		population: 0,
+		total_family: 0,
+		total_hamlet: 0
+	});
+	let isHydratedOverview = $state(false);
+	let isSavingOverview = $state(false);
+
+	$effect(() => {
+		const overview = overviewQuery.data?.data;
+		if (overview && !isHydratedOverview) {
+			overviewForm = {
+				title: overview.title || '',
+				description: overview.description || '',
+				media_id: overview.media || '',
+				area: overview.area || '',
+				population: overview.population || 0,
+				total_family: overview.total_family || 0,
+				total_hamlet: overview.total_hamlet || 0
+			};
+			isHydratedOverview = true;
+		}
+	});
+
+	async function handleSaveOverview(e: Event) {
+		e.preventDefault();
+		isSavingOverview = true;
+		try {
+			await createDashboardOverview({
+				title: overviewForm.title,
+				description: overviewForm.description,
+				media_id: overviewForm.media_id.trim() || null,
+				area: overviewForm.area,
+				population: Number(overviewForm.population),
+				total_family: Number(overviewForm.total_family),
+				total_hamlet: Number(overviewForm.total_hamlet)
+			});
+			await queryClient.invalidateQueries({ queryKey: ['dashboard', 'overview'] });
+			toast.success('Overview dashboard berhasil disimpan!');
+		} catch (error) {
+			const err = error as { apiResponse?: { message?: string }; message?: string };
+			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
+			toast.error({ title: 'Gagal menyimpan overview', message: msg });
+		} finally {
+			isSavingOverview = false;
+		}
+	}
 	let filteredDashboardItems = $derived(
 		dashboardItems.filter((item) => {
 			const query = searchQuery.toLowerCase();
@@ -296,6 +354,124 @@
 			</TableBody>
 		</Table>
 	{/if}
+
+	<section class="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+		<div>
+			<h3 class="text-base font-bold text-slate-900">Ringkasan Overview (Sekilas Desa)</h3>
+			<p class="mt-0.5 text-xs font-medium text-slate-500">
+				Kelola informasi ringkasan desa yang tampil pada halaman dashboard utama.
+			</p>
+		</div>
+
+		{#if overviewQuery.isPending}
+			<div class="flex items-center gap-3 py-6 text-xs font-semibold text-slate-500">
+				<Loader2 size={16} class="animate-spin" />
+				Memuat data overview...
+			</div>
+		{:else}
+			<form onsubmit={handleSaveOverview} class="space-y-4">
+				<div class="grid gap-4 md:grid-cols-2">
+					<div class="space-y-1.5">
+						<label
+							for="ov-title"
+							class="block text-xs font-bold uppercase tracking-wide text-slate-500"
+							>Judul Overview</label
+						>
+						<Input
+							id="ov-title"
+							bind:value={overviewForm.title}
+							placeholder="Contoh: Desa Cipicung"
+							required
+						/>
+					</div>
+					<div class="space-y-1.5">
+						<label
+							for="ov-area"
+							class="block text-xs font-bold uppercase tracking-wide text-slate-500"
+							>Luas Wilayah</label
+						>
+						<Input id="ov-area" bind:value={overviewForm.area} placeholder="Contoh: 420 Ha" />
+					</div>
+				</div>
+
+				<div class="space-y-1.5">
+					<label
+						for="ov-desc"
+						class="block text-xs font-bold uppercase tracking-wide text-slate-500"
+						>Deskripsi Ringkasan</label
+					>
+					<Textarea
+						id="ov-desc"
+						bind:value={overviewForm.description}
+						placeholder="Deskripsi sekilas desa..."
+						rows={3}
+						required
+					/>
+				</div>
+
+				<div class="grid gap-4 md:grid-cols-3">
+					<div class="space-y-1.5">
+						<label
+							for="ov-pop"
+							class="block text-xs font-bold uppercase tracking-wide text-slate-500"
+							>Total Populasi</label
+						>
+						<Input id="ov-pop" type="number" bind:value={overviewForm.population} min={0} />
+					</div>
+					<div class="space-y-1.5">
+						<label
+							for="ov-fam"
+							class="block text-xs font-bold uppercase tracking-wide text-slate-500"
+							>Total Kepala Keluarga</label
+						>
+						<Input id="ov-fam" type="number" bind:value={overviewForm.total_family} min={0} />
+					</div>
+					<div class="space-y-1.5">
+						<label
+							for="ov-hamlet"
+							class="block text-xs font-bold uppercase tracking-wide text-slate-500"
+							>Total Dusun</label
+						>
+						<Input id="ov-hamlet" type="number" bind:value={overviewForm.total_hamlet} min={0} />
+					</div>
+				</div>
+
+				<div class="space-y-1.5">
+					<label class="block text-xs font-bold uppercase tracking-wide text-slate-500"
+						>Gambar Banner Overview</label
+					>
+					<ImageUploader
+						bind:value={overviewForm.media_id}
+						aspectRatio={16 / 9}
+						placeholder="Pilih gambar header overview"
+					/>
+				</div>
+
+				{#if overviewQuery.data?.data}
+					<div
+						class="grid grid-cols-2 gap-4 rounded-lg bg-slate-50 p-4 text-xs font-semibold text-slate-600"
+					>
+						<div>
+							Total Berita: <span class="font-bold text-slate-900"
+								>{overviewQuery.data.data.total_news}</span
+							>
+						</div>
+						<div>
+							Total Potensi: <span class="font-bold text-slate-900"
+								>{overviewQuery.data.data.total_potential}</span
+							>
+						</div>
+					</div>
+				{/if}
+
+				<div class="flex justify-end pt-2">
+					<Button type="submit" disabled={isSavingOverview}>
+						{isSavingOverview ? 'Menyimpan...' : 'Simpan Overview'}
+					</Button>
+				</div>
+			</form>
+		{/if}
+	</section>
 </div>
 
 <Dialog

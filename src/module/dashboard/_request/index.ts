@@ -5,7 +5,8 @@ import type {
 	FindDashboardPayload,
 	UpdateDashboardPayload,
 	DeleteDashboardPayload,
-	ActivateDashboardPayload
+	ActivateDashboardPayload,
+	CreateDashboardOverviewPayload
 } from '../_model/payload';
 import type {
 	CreateDashboardResponse,
@@ -13,7 +14,9 @@ import type {
 	FindDashboardResponse,
 	UpdateDashboardResponse,
 	DeleteDashboardResponse,
-	ActivateDashboardResponse
+	ActivateDashboardResponse,
+	CreateDashboardOverviewResponse,
+	FindDashboardOverviewResponse
 } from '../_model/response';
 
 export const createDashboard = async (
@@ -62,3 +65,20 @@ export const activateDashboard = async (
 	const { data } = await api.post<ActivateDashboardResponse>('/dashboard/activate', payload);
 	return data;
 };
+
+export const createDashboardOverview = async (
+	payload: CreateDashboardOverviewPayload
+): Promise<CreateDashboardOverviewResponse> => {
+	const { data } = await api.post<CreateDashboardOverviewResponse>(
+		'/dashboard/overview/create',
+		payload
+	);
+	return data;
+};
+export const createOverview = createDashboardOverview;
+
+export const getDashboardOverview = async (): Promise<FindDashboardOverviewResponse> => {
+	const { data } = await api.post<FindDashboardOverviewResponse>('/dashboard/overview', {});
+	return data;
+};
+export const getOverview = getDashboardOverview;

@@ -36,3 +36,14 @@ export const ActivateDashboardPayloadSchema = z.object({
 	id: z.number()
 });
 export type ActivateDashboardPayload = z.infer<typeof ActivateDashboardPayloadSchema>;
+
+export const CreateDashboardOverviewPayloadSchema = z.object({
+	title: z.string(),
+	description: z.string(),
+	media_id: z.string().nullable().optional(),
+	area: z.string().optional(),
+	population: z.number().optional(),
+	total_family: z.number().optional(),
+	total_hamlet: z.number().optional()
+});
+export type CreateDashboardOverviewPayload = z.infer<typeof CreateDashboardOverviewPayloadSchema>;

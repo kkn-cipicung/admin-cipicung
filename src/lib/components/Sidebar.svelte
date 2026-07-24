@@ -98,10 +98,12 @@
 {/if}
 
 <aside
-	class="fixed bottom-0 top-0 left-0 z-50 flex w-72 flex-col border-r border-hijaugelap-750/30 bg-hijaugelap-600 text-sage-100 transition-all duration-300 ease-in-out lg:sticky lg:translate-x-0
+	class="fixed bottom-0 top-0 left-0 z-50 flex h-screen w-72 flex-col border-r border-hijaugelap-750/30 bg-hijaugelap-600 text-sage-100 transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0
 	{isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}"
 >
-	<div class="flex h-20 items-center justify-between px-6 border-b border-hijaugelap-700/55">
+	<div
+		class="flex h-20 shrink-0 items-center justify-between px-6 border-b border-hijaugelap-700/55"
+	>
 		<a href="/dashboard" class="flex items-center gap-3 group">
 			<div
 				class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-all"
@@ -126,7 +128,7 @@
 		</button>
 	</div>
 
-	<nav class="flex-1 space-y-1.5 px-4 py-6 overflow-y-auto">
+	<nav class="flex-1 min-h-0 space-y-1.5 px-4 py-6 overflow-y-auto">
 		<div class="px-3 mb-2">
 			<p class="text-[10px] font-bold tracking-widest text-sage-400 uppercase">Menu Utama</p>
 		</div>
@@ -200,7 +202,7 @@
 		{/each}
 	</nav>
 
-	<div class="mt-auto p-4 border-t border-hijaugelap-700/55 bg-hijaugelap-700/25">
+	<div class="mt-auto shrink-0 p-4 border-t border-hijaugelap-700/55 bg-hijaugelap-700/25">
 		<div
 			class="flex items-center justify-between rounded-2xl bg-hijaugelap-700 border border-hijaugelap-500/30 p-3 shadow-sm"
 		>
