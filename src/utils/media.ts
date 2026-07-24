@@ -13,18 +13,24 @@ export function getMediaUrlCandidates(media: number | string | null | undefined)
 		return [value];
 	}
 
-	const baseUrl = (API_URL || '').replace(/\/$/, '');
+	const rawBaseUrl = (API_URL || '').replace(/\/$/, '');
+	const baseUrlWithoutApi = rawBaseUrl.replace(/\/api$/, '');
 	const normalizedPath = value.replace(/^\//, '');
 
 	if (/^\d+$/.test(value)) {
 		return [
-			`${baseUrl}/api/media/${value}`,
-			`${baseUrl}/api/media?id=${value}`,
-			`${baseUrl}/media/${value}`,
-			`${baseUrl}/media?id=${value}`,
-			`${baseUrl}/uploads/${value}`
+			`${baseUrlWithoutApi}/uploads/${value}`,
+			`${rawBaseUrl}/media/${value}`,
+			`${baseUrlWithoutApi}/media/${value}`,
+			`${rawBaseUrl}/api/media/${value}`
 		];
 	}
 
-	return [`${baseUrl}/${normalizedPath}`];
+	const candidates = [
+		`${baseUrlWithoutApi}/${normalizedPath}`,
+		`${rawBaseUrl}/${normalizedPath}`,
+		`/${normalizedPath}`
+	];
+
+	return Array.from(new Set(candidates)).filter(Boolean);
 }
