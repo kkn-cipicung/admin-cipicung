@@ -6,11 +6,9 @@
 		FolderOpen,
 		Newspaper,
 		Sparkles,
-		Store,
 		X,
 		LogOut,
 		Compass,
-		FileImage,
 		MapPinned,
 		Images,
 		Contact,
@@ -62,17 +60,12 @@
 			name: 'Kategori',
 			href: '/category',
 			icon: FolderOpen
-		},
-		{
-			name: 'Bisnis & UMKM',
-			href: '/business',
-			icon: Store
-		},
-		{
-			name: 'Base64 Formatter',
-			href: '/dashboard/base64',
-			icon: FileImage
 		}
+		// {
+		// 	name: 'Bisnis & UMKM',
+		// 	href: '/business',
+		// 	icon: Store
+		// },
 	];
 
 	const isActive = (href: string) => {

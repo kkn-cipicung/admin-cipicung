@@ -57,7 +57,6 @@
 	let editForm = $state({
 		title: '',
 		subtitle: '',
-		slug: '',
 		description: '',
 		category_id: 0,
 		media_id: ''
@@ -72,7 +71,6 @@
 		editForm = {
 			title: '',
 			subtitle: '',
-			slug: '',
 			description: '',
 			category_id: getDefaultCategoryId(latestCategories),
 			media_id: ''
@@ -95,7 +93,6 @@
 		editForm = {
 			title: item.title,
 			subtitle: item.subtitle || '',
-			slug: item.slug,
 			description: item.description,
 			category_id: item.category.id,
 			media_id: item.media_id ? String(item.media_id) : item.media || ''
@@ -115,7 +112,6 @@
 					category_id: Number(editForm.category_id),
 					title: editForm.title,
 					subtitle: editForm.subtitle,
-					slug: editForm.slug,
 					description: editForm.description,
 					media_id: mediaId || null
 				});
@@ -124,7 +120,6 @@
 					category_id: Number(editForm.category_id),
 					title: editForm.title,
 					subtitle: editForm.subtitle,
-					slug: editForm.slug,
 					description: editForm.description,
 					media_id: mediaId || null
 				});
@@ -299,13 +294,6 @@
 				>
 				<Input id="edit-sub" bind:value={editForm.subtitle} required />
 			</div>
-		</div>
-
-		<div class="space-y-1.5">
-			<label for="edit-slug" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-				>Slug</label
-			>
-			<Input id="edit-slug" bind:value={editForm.slug} required />
 		</div>
 
 		<div class="space-y-1.5">

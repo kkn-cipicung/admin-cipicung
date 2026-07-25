@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { BaseResponseSchema } from '../../../utils/types';
 
 export const ContactDetailSchema = z.object({
+	id: z.number().optional(),
 	office: z.object({
 		name: z.string(),
 		address: z.string(),

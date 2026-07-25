@@ -5,7 +5,6 @@ export const CreatePotentialPayloadSchema = z.object({
 	category_id: z.number(),
 	title: z.string(),
 	subtitle: z.string().optional(),
-	slug: z.string(),
 	description: z.string().max(255),
 	location: z
 		.object({
@@ -32,7 +31,6 @@ export const UpdatePotentialPayloadSchema = z.object({
 	category_id: z.number(),
 	title: z.string(),
 	subtitle: z.string().optional(),
-	slug: z.string(),
 	description: z.string().max(255),
 	location: z
 		.object({

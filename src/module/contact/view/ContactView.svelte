@@ -23,26 +23,43 @@
 		address: '',
 		postal_code: '',
 		phone: '',
-		email: ''
+		email: '',
+		ig_usn: '',
+		tiktok_usn: '',
+		yt_usn: ''
 	});
 	let hasHydrated = $state(false);
 	let isSaving = $state(false);
 	let contactDetail = $derived(contactQuery.data?.data);
 
+	function getSocialUsername(data: NonNullable<typeof contactDetail>, name: string) {
+		return (
+			data.social_media.find((item) => item.name.toLowerCase() === name.toLowerCase())?.username ||
+			''
+		);
+	}
+
+	function hydrateForm(data: NonNullable<typeof contactDetail>) {
+		form = {
+			id: data.id || 0,
+			name: data.office?.name || '',
+			province: data.office?.province || '',
+			regency: data.office?.regency || '',
+			district: data.office?.district || '',
+			address: data.office?.address || '',
+			postal_code: data.office?.postal_code || '',
+			phone: data.contact?.phone || '',
+			email: data.contact?.email || '',
+			ig_usn: getSocialUsername(data, 'Instagram'),
+			tiktok_usn: getSocialUsername(data, 'TikTok'),
+			yt_usn: getSocialUsername(data, 'YouTube')
+		};
+	}
+
 	$effect(() => {
 		const data = contactDetail;
 		if (data && !hasHydrated) {
-			form = {
-				id: (data as { id?: number }).id || 0,
-				name: data.office?.name || '',
-				province: data.office?.province || '',
-				regency: data.office?.regency || '',
-				district: data.office?.district || '',
-				address: data.office?.address || '',
-				postal_code: data.office?.postal_code || '',
-				phone: data.contact?.phone || '',
-				email: data.contact?.email || ''
-			};
+			hydrateForm(data);
 			hasHydrated = true;
 		}
 	});
@@ -55,6 +72,12 @@
 			if (id) await updateContact({ id: Number(id), ...payload });
 			else await createContact(payload);
 			await queryClient.invalidateQueries({ queryKey: ['contact', 'detail'] });
+			const refreshed = await queryClient.fetchQuery({
+				queryKey: ['contact', 'detail'],
+				queryFn: getContactDetail,
+				retry: false
+			});
+			if (refreshed.data) hydrateForm(refreshed.data);
 			toast.success('Kontak berhasil disimpan!');
 		} catch (error) {
 			const err = error as { apiResponse?: { message?: string }; message?: string };
@@ -82,6 +105,9 @@
 			<FloatingInput bind:value={form.postal_code} label="Kode pos" required />
 			<FloatingInput bind:value={form.phone} label="Telepon" required />
 			<FloatingInput bind:value={form.email} label="Email" required />
+			<FloatingInput bind:value={form.ig_usn} label="Instagram username" />
+			<FloatingInput bind:value={form.tiktok_usn} label="TikTok username" />
+			<FloatingInput bind:value={form.yt_usn} label="YouTube username" />
 		</div>
 		<FloatingTextarea rows={3} bind:value={form.address} label="Alamat" required />
 		<div class="flex justify-end">
@@ -112,6 +138,11 @@
 					{contactDetail.contact.phone || '-'}<br />
 					{contactDetail.contact.email || '-'}
 				</p>
+				<div>
+					{#each contactDetail.social_media as item}
+						<p>{item.name}: {item.username}</p>
+					{/each}
+				</div>
 			</div>
 		{:else}
 			<p class="text-xs font-semibold text-slate-400">Belum ada data kontak aktif.</p>

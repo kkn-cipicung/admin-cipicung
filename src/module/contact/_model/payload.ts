@@ -8,7 +8,10 @@ export const ContactPayloadSchema = z.object({
 	address: z.string(),
 	postal_code: z.string().optional(),
 	phone: z.string().optional(),
-	email: z.string().optional()
+	email: z.string().optional(),
+	ig_usn: z.string().optional(),
+	tiktok_usn: z.string().optional(),
+	yt_usn: z.string().optional()
 });
 export type CreateContactPayload = z.infer<typeof ContactPayloadSchema>;
 export const UpdateContactPayloadSchema = ContactPayloadSchema.extend({ id: z.number() });
