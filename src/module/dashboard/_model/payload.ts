@@ -42,7 +42,6 @@ export const CreateDashboardOverviewPayloadSchema = z.object({
 	description: z.string(),
 	media_id: z.string().nullable().optional(),
 	area: z.string().optional(),
-	population: z.number().optional(),
 	total_family: z.number().optional(),
 	total_hamlet: z.number().optional()
 });

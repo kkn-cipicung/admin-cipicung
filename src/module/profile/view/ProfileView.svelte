@@ -19,7 +19,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
 	import ConfirmDialog from '$lib/components/ui/ConfirmDialog.svelte';
-	import { Loader2, Pencil, Plus, Trash2 } from '@lucide/svelte';
+	import { CheckCircle2, Landmark, Loader2, MapPin, Pencil, Plus, Sparkles, Target, Trash2, Users } from '@lucide/svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 
 	type HeadmanForm = {
@@ -29,6 +29,14 @@
 		finish_date: string;
 		is_active: boolean;
 	};
+
+	function formatPosition(pos?: string): string {
+		if (!pos) return '-';
+		return pos
+			.split(/[-_]/)
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+			.join(' ');
+	}
 
 	const queryClient = useQueryClient();
 	const profileQuery = createQuery(() => ({
@@ -73,13 +81,8 @@
 	let officialForm = $state({
 		name: '',
 		position: '',
-		phone: '',
-		email: '',
-		description: '',
 		order_number: 1,
-		is_active: true,
-		start_date: '',
-		finish_date: ''
+		is_active: true
 	});
 
 	function handleCreateOfficial() {
@@ -87,13 +90,8 @@
 		officialForm = {
 			name: '',
 			position: '',
-			phone: '',
-			email: '',
-			description: '',
 			order_number: officials.length + 1,
-			is_active: true,
-			start_date: '',
-			finish_date: ''
+			is_active: true
 		};
 		isOfficialDialogOpen = true;
 	}
@@ -103,13 +101,8 @@
 		officialForm = {
 			name: item.name,
 			position: item.position,
-			phone: item.phone || '',
-			email: item.email || '',
-			description: item.description || '',
 			order_number: item.order_number || 1,
-			is_active: Boolean(item.is_active),
-			start_date: item.start_date || '',
-			finish_date: item.finish_date || ''
+			is_active: Boolean(item.is_active)
 		};
 		isOfficialDialogOpen = true;
 	}
@@ -122,13 +115,8 @@
 			const payload = {
 				name: officialForm.name,
 				position: officialForm.position,
-				phone: officialForm.phone || undefined,
-				email: officialForm.email || undefined,
-				description: officialForm.description || undefined,
 				order_number: Number(officialForm.order_number) || 1,
-				is_active: officialForm.is_active,
-				start_date: officialForm.start_date || undefined,
-				finish_date: officialForm.finish_date || null
+				is_active: officialForm.is_active
 			};
 			if (editingOfficial) {
 				await updateOfficial({ id: editingOfficial.id, ...payload });
@@ -489,7 +477,7 @@
 									<span
 										class="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 uppercase"
 									>
-										{item.position}
+										{formatPosition(item.position)}
 									</span>
 									{#if item.is_active}
 										<span
@@ -499,13 +487,6 @@
 										</span>
 									{/if}
 								</div>
-								<p class="mt-1 text-xs text-slate-500">
-									{item.phone ? `HP: ${item.phone}` : ''}
-									{item.email ? `| Email: ${item.email}` : ''}
-									{item.start_date
-										? `| Masa: ${item.start_date} s/d ${item.finish_date || 'Sekarang'}`
-										: ''}
-								</p>
 							</div>
 
 							<div class="flex items-center gap-2">
@@ -534,39 +515,253 @@
 		</section>
 	</div>
 
-	<aside class="space-y-4">
-		<section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-			<h3 class="text-sm font-bold text-slate-900">Visi Aktif</h3>
-			{#if visionQuery.isPending}
-				<p class="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-500">
-					<Loader2 size={16} class="animate-spin" />Memuat...
-				</p>
-			{:else}
-				<p class="mt-3 text-xs font-semibold text-slate-500">
-					{visionQuery.data?.data?.vision || '-'}
-				</p>
-			{/if}
+	<aside class="space-y-5">
+		<!-- Visi & Misi Card -->
+		<section
+			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md"
+		>
+			<div class="flex items-center gap-3 border-b border-slate-100 bg-slate-50/60 p-4">
+				<div
+					class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100/80 text-blue-600 shadow-xs"
+				>
+					<Target size={18} />
+				</div>
+				<div>
+					<h3 class="text-sm font-bold text-slate-900">Visi & Misi Aktif</h3>
+					<p class="text-[11px] font-medium text-slate-500">Prinsip & panduan desa</p>
+				</div>
+			</div>
+			<div class="p-4 space-y-3">
+				{#if visionQuery.isPending}
+					<div class="flex items-center gap-2 py-2 text-xs font-semibold text-slate-400">
+						<Loader2 size={16} class="animate-spin text-blue-500" /> Memuat visi...
+					</div>
+				{:else if visionQuery.data?.data?.vision}
+					<div class="relative rounded-lg border-l-4 border-blue-500 bg-blue-50/40 p-3">
+						<p class="text-xs font-medium italic leading-relaxed text-slate-700">
+							"{visionQuery.data.data.vision}"
+						</p>
+					</div>
+					{#if visionQuery.data?.data?.mission && visionQuery.data.data.mission.length > 0}
+						<div class="pt-1">
+							<div class="mb-2 flex items-center justify-between">
+								<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
+									>Misi Utama</span
+								>
+								<span class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+									{visionQuery.data.data.mission.length} Poin
+								</span>
+							</div>
+							<ul class="space-y-1.5">
+								{#each visionQuery.data.data.mission as item}
+									<li class="flex items-start gap-2 text-xs text-slate-600">
+										<CheckCircle2 size={14} class="mt-0.5 shrink-0 text-blue-500" />
+										<span class="leading-tight">{item}</span>
+									</li>
+								{/each}
+							</ul>
+						</div>
+					{/if}
+				{:else}
+					<p class="text-xs font-medium italic text-slate-400">Belum ada visi yang diatur.</p>
+				{/if}
+			</div>
 		</section>
-		<section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-			<h3 class="text-sm font-bold text-slate-900">Wilayah</h3>
-			<p class="mt-3 text-xs font-semibold text-slate-500">
-				{regionQuery.data?.data?.region || '-'}<br />
-				{regionQuery.data?.data?.area || '-'}
-			</p>
+
+		<!-- Wilayah Card -->
+		<section
+			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md"
+		>
+			<div class="flex items-center gap-3 border-b border-slate-100 bg-slate-50/60 p-4">
+				<div
+					class="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100/80 text-emerald-600 shadow-xs"
+				>
+					<MapPin size={18} />
+				</div>
+				<div>
+					<h3 class="text-sm font-bold text-slate-900">Informasi Wilayah</h3>
+					<p class="text-[11px] font-medium text-slate-500">Cakupan & batas desa</p>
+				</div>
+			</div>
+			<div class="p-4 space-y-3">
+				{#if regionQuery.isPending}
+					<div class="flex items-center gap-2 py-2 text-xs font-semibold text-slate-400">
+						<Loader2 size={16} class="animate-spin text-emerald-500" /> Memuat wilayah...
+					</div>
+				{:else}
+					<div class="grid grid-cols-2 gap-2">
+						<div class="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
+							<span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400"
+								>Wilayah</span
+							>
+							<span class="mt-0.5 block truncate text-xs font-bold text-slate-800">
+								{regionQuery.data?.data?.region || '-'}
+							</span>
+						</div>
+						<div class="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
+							<span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400"
+								>Luas Wilayah</span
+							>
+							<span class="mt-0.5 block truncate text-xs font-bold text-emerald-700">
+								{regionQuery.data?.data?.area || '-'}
+							</span>
+						</div>
+					</div>
+
+					{#if regionQuery.data?.data?.hamlet_one !== undefined || regionQuery.data?.data?.hamlet_two !== undefined}
+						<div
+							class="flex items-center justify-between rounded-lg border border-emerald-100/80 bg-emerald-50/40 p-2.5 text-xs"
+						>
+							<div class="flex items-center gap-2 font-medium text-emerald-800">
+								<Users size={14} class="text-emerald-600" />
+								<span>Dusun 1 / Dusun 2</span>
+							</div>
+							<div class="font-bold text-emerald-900">
+								{regionQuery.data?.data?.hamlet_one || 0} / {regionQuery.data?.data?.hamlet_two || 0} jiwa
+							</div>
+						</div>
+					{/if}
+
+					{#if regionQuery.data?.data?.north_border || regionQuery.data?.data?.east_border || regionQuery.data?.data?.south_border || regionQuery.data?.data?.west_border}
+						<div>
+							<span class="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-400"
+								>Batas Perbatasan</span
+							>
+							<div class="grid grid-cols-2 gap-1.5 text-[11px]">
+								{#if regionQuery.data?.data?.north_border}
+									<div
+										class="flex items-center gap-1.5 rounded border border-slate-100 bg-slate-50 px-2 py-1 text-slate-600"
+									>
+										<span class="text-[10px] font-bold text-slate-400">U:</span>
+										<span class="truncate font-medium">{regionQuery.data.data.north_border}</span>
+									</div>
+								{/if}
+								{#if regionQuery.data?.data?.east_border}
+									<div
+										class="flex items-center gap-1.5 rounded border border-slate-100 bg-slate-50 px-2 py-1 text-slate-600"
+									>
+										<span class="text-[10px] font-bold text-slate-400">T:</span>
+										<span class="truncate font-medium">{regionQuery.data.data.east_border}</span>
+									</div>
+								{/if}
+								{#if regionQuery.data?.data?.south_border}
+									<div
+										class="flex items-center gap-1.5 rounded border border-slate-100 bg-slate-50 px-2 py-1 text-slate-600"
+									>
+										<span class="text-[10px] font-bold text-slate-400">S:</span>
+										<span class="truncate font-medium">{regionQuery.data.data.south_border}</span>
+									</div>
+								{/if}
+								{#if regionQuery.data?.data?.west_border}
+									<div
+										class="flex items-center gap-1.5 rounded border border-slate-100 bg-slate-50 px-2 py-1 text-slate-600"
+									>
+										<span class="text-[10px] font-bold text-slate-400">B:</span>
+										<span class="truncate font-medium">{regionQuery.data.data.west_border}</span>
+									</div>
+								{/if}
+							</div>
+						</div>
+					{/if}
+				{/if}
+			</div>
 		</section>
-		<section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-			<h3 class="text-sm font-bold text-slate-900">Pemerintahan</h3>
-			<p class="mt-3 text-xs font-semibold text-slate-500">
-				{governmentQuery.data?.data?.[0]?.name || '-'}<br />
-				{governmentQuery.data?.data?.[0]?.position || ''}
-			</p>
+
+		<!-- Pemerintahan Card -->
+		<section
+			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md"
+		>
+			<div class="flex items-center gap-3 border-b border-slate-100 bg-slate-50/60 p-4">
+				<div
+					class="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-100/80 text-violet-600 shadow-xs"
+				>
+					<Landmark size={18} />
+				</div>
+				<div>
+					<h3 class="text-sm font-bold text-slate-900">Pemerintahan</h3>
+					<p class="text-[11px] font-medium text-slate-500">Struktur & aparatur aktif</p>
+				</div>
+			</div>
+			<div class="p-4 space-y-3">
+				{#if governmentQuery.isPending}
+					<div class="flex items-center gap-2 py-2 text-xs font-semibold text-slate-400">
+						<Loader2 size={16} class="animate-spin text-violet-500" /> Memuat data pemerintahan...
+					</div>
+				{:else if governmentQuery.data?.data && governmentQuery.data.data.length > 0}
+					<div class="space-y-2">
+						{#each governmentQuery.data.data.slice(0, 4) as member}
+							<div
+								class="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/60 p-2.5"
+							>
+								<div class="flex items-center gap-2.5">
+									<div
+										class="flex h-7 w-7 items-center justify-center rounded-full bg-violet-100 text-xs font-bold text-violet-700"
+									>
+										{member.name ? member.name.charAt(0).toUpperCase() : '?'}
+									</div>
+									<div>
+										<h4 class="text-xs font-bold text-slate-800">{member.name}</h4>
+										<p class="text-[11px] font-medium text-slate-500">
+											{formatPosition(member.position)}
+										</p>
+									</div>
+								</div>
+								<span
+									class="rounded bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-700 uppercase"
+								>
+									Aktif
+								</span>
+							</div>
+						{/each}
+						{#if governmentQuery.data.data.length > 4}
+							<p class="pt-1 text-center text-[11px] font-semibold text-slate-400">
+								+{governmentQuery.data.data.length - 4} aparatur lainnya
+							</p>
+						{/if}
+					</div>
+				{:else}
+					<p class="text-xs font-medium italic text-slate-400">Belum ada data pemerintahan.</p>
+				{/if}
+			</div>
 		</section>
-		<section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-			<h3 class="text-sm font-bold text-slate-900">Potensi Sumber Daya</h3>
-			<p class="mt-3 text-xs font-semibold text-slate-500">
-				{resourceQuery.data?.data?.title || '-'}<br />
-				{resourceQuery.data?.data?.detail || ''}
-			</p>
+
+		<!-- Potensi Sumber Daya Card -->
+		<section
+			class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md"
+		>
+			<div class="flex items-center gap-3 border-b border-slate-100 bg-slate-50/60 p-4">
+				<div
+					class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100/80 text-amber-600 shadow-xs"
+				>
+					<Sparkles size={18} />
+				</div>
+				<div>
+					<h3 class="text-sm font-bold text-slate-900">Potensi Sumber Daya</h3>
+					<p class="text-[11px] font-medium text-slate-500">Keunggulan & potensi desa</p>
+				</div>
+			</div>
+			<div class="p-4 space-y-2">
+				{#if resourceQuery.isPending}
+					<div class="flex items-center gap-2 py-2 text-xs font-semibold text-slate-400">
+						<Loader2 size={16} class="animate-spin text-amber-500" /> Memuat potensi...
+					</div>
+				{:else if resourceQuery.data?.data?.title}
+					<div class="rounded-lg border border-amber-100 bg-amber-50/40 p-3">
+						<span
+							class="mb-1.5 inline-block rounded bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800"
+						>
+							{resourceQuery.data.data.title}
+						</span>
+						{#if resourceQuery.data.data.detail}
+							<p class="text-xs leading-relaxed text-slate-600">
+								{resourceQuery.data.data.detail}
+							</p>
+						{/if}
+					</div>
+				{:else}
+					<p class="text-xs font-medium italic text-slate-400">Belum ada potensi sumber daya.</p>
+				{/if}
+			</div>
 		</section>
 	</aside>
 </div>
@@ -603,47 +798,6 @@
 			</div>
 		</div>
 
-		<div class="grid gap-4 md:grid-cols-2">
-			<div class="space-y-1.5">
-				<label
-					for="off-phone"
-					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Telepon / HP</label
-				>
-				<Input id="off-phone" bind:value={officialForm.phone} placeholder="08123456789" />
-			</div>
-			<div class="space-y-1.5">
-				<label
-					for="off-email"
-					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Email</label
-				>
-				<Input
-					id="off-email"
-					type="email"
-					bind:value={officialForm.email}
-					placeholder="sekdes@cipicung.id"
-				/>
-			</div>
-		</div>
-
-		<div class="grid gap-4 md:grid-cols-2">
-			<div class="space-y-1.5">
-				<label
-					for="off-start"
-					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-					>Tanggal Mulai</label
-				>
-				<Input id="off-start" type="date" bind:value={officialForm.start_date} />
-			</div>
-			<div class="space-y-1.5">
-				<label
-					for="off-finish"
-					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-					>Tanggal Selesai</label
-				>
-				<Input id="off-finish" type="date" bind:value={officialForm.finish_date} />
-			</div>
-		</div>
-
 		<div class="grid gap-4 md:grid-cols-2 items-center">
 			<div class="space-y-1.5">
 				<label
@@ -663,17 +817,6 @@
 					Status Aktif
 				</label>
 			</div>
-		</div>
-
-		<div class="space-y-1.5">
-			<label for="off-desc" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
-				>Keterangan / Deskripsi</label
-			>
-			<Input
-				id="off-desc"
-				bind:value={officialForm.description}
-				placeholder="Deskripsi tugas atau periode"
-			/>
 		</div>
 
 		<div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">

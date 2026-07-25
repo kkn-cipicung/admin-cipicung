@@ -47,13 +47,8 @@ export const OfficialPayloadSchema = z.object({
 	village_id: z.number().optional(),
 	name: z.string(),
 	position: z.string(),
-	phone: z.string().optional(),
-	email: z.string().optional(),
-	description: z.string().optional(),
 	order_number: z.number().optional(),
-	is_active: z.boolean().optional(),
-	start_date: z.string().nullable().optional(),
-	finish_date: z.string().nullable().optional()
+	is_active: z.boolean().optional()
 });
 export type CreateOfficialPayload = z.infer<typeof OfficialPayloadSchema>;
 export type UpdateOfficialPayload = z.infer<typeof OfficialPayloadSchema>;

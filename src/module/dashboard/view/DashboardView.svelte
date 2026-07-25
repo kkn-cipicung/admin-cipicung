@@ -102,7 +102,6 @@
 				description: overviewForm.description,
 				media_id: overviewForm.media_id.trim() || null,
 				area: overviewForm.area,
-				population: Number(overviewForm.population),
 				total_family: Number(overviewForm.total_family),
 				total_hamlet: Number(overviewForm.total_hamlet)
 			});
@@ -430,27 +429,11 @@
 				<div class="grid gap-4 md:grid-cols-3">
 					<div class="space-y-1.5">
 						<label
-							for="ov-pop"
-							class="block text-xs font-bold uppercase tracking-wide text-slate-500"
-							>Total Populasi</label
-						>
-						<Input id="ov-pop" type="number" bind:value={overviewForm.population} min={0} />
-					</div>
-					<div class="space-y-1.5">
-						<label
 							for="ov-fam"
 							class="block text-xs font-bold uppercase tracking-wide text-slate-500"
 							>Total Kepala Keluarga</label
 						>
 						<Input id="ov-fam" type="number" bind:value={overviewForm.total_family} min={0} />
-					</div>
-					<div class="space-y-1.5">
-						<label
-							for="ov-hamlet"
-							class="block text-xs font-bold uppercase tracking-wide text-slate-500"
-							>Total Dusun</label
-						>
-						<Input id="ov-hamlet" type="number" bind:value={overviewForm.total_hamlet} min={0} />
 					</div>
 				</div>
 

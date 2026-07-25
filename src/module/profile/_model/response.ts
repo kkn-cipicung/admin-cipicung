@@ -69,13 +69,8 @@ export const OfficialDataSchema = z.object({
 	village_id: z.number().optional(),
 	name: z.string(),
 	position: z.string(),
-	phone: z.string().optional(),
-	email: z.string().optional(),
-	description: z.string().optional(),
 	order_number: z.number().optional(),
 	is_active: z.boolean().optional(),
-	start_date: z.string().nullable().optional(),
-	finish_date: z.string().nullable().optional(),
 	created_at: z.string().optional(),
 	updated_at: z.string().optional()
 });
