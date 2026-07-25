@@ -2,7 +2,6 @@ import api from '../../../lib/axios';
 import type {
 	CreateOfficialPayload,
 	CreateProfilePayload,
-	ProfileIdPayload,
 	UpdateOfficialPayload
 } from '../_model/payload';
 import type {
