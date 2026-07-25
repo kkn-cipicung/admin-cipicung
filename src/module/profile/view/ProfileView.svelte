@@ -342,7 +342,10 @@
 
 <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_24rem]">
 	<div class="space-y-6">
-		<form onsubmit={save} class="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+		<form
+			onsubmit={save}
+			class="space-y-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+		>
 			<div>
 				<h2 class="text-base font-bold text-slate-900">Pengelolaan Profil Desa</h2>
 				<p class="mt-1 text-xs font-medium text-slate-500">
@@ -422,7 +425,11 @@
 								<FloatingInput bind:value={headman.name} label="Nama kepala desa" />
 								<FloatingInput bind:value={headman.position} label="Jabatan" />
 								<FloatingInput type="date" bind:value={headman.start_date} label="Tanggal mulai" />
-								<FloatingInput type="date" bind:value={headman.finish_date} label="Tanggal selesai" />
+								<FloatingInput
+									type="date"
+									bind:value={headman.finish_date}
+									label="Tanggal selesai"
+								/>
 							</div>
 
 							<label class="mt-4 flex items-center gap-2 text-xs font-bold text-slate-600">
@@ -461,11 +468,15 @@
 			</div>
 
 			{#if officialsQuery.isPending}
-				<div class="flex items-center justify-center p-8 text-xs font-semibold text-slate-400 gap-2">
+				<div
+					class="flex items-center justify-center p-8 text-xs font-semibold text-slate-400 gap-2"
+				>
 					<Loader2 size={16} class="animate-spin" /> Memuat daftar perangkat desa...
 				</div>
 			{:else if officials.length === 0}
-				<div class="rounded-lg border border-dashed border-slate-200 p-8 text-center text-xs font-medium text-slate-400">
+				<div
+					class="rounded-lg border border-dashed border-slate-200 p-8 text-center text-xs font-medium text-slate-400"
+				>
 					Belum ada data perangkat desa. Klik tombol di atas untuk menambah.
 				</div>
 			{:else}
@@ -475,18 +486,25 @@
 							<div>
 								<div class="flex items-center gap-2">
 									<h4 class="text-sm font-bold text-slate-900">{item.name}</h4>
-									<span class="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 uppercase">
+									<span
+										class="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 uppercase"
+									>
 										{item.position}
 									</span>
 									{#if item.is_active}
-										<span class="rounded bg-green-50 px-2 py-0.5 text-[10px] font-bold text-green-700 uppercase">
+										<span
+											class="rounded bg-green-50 px-2 py-0.5 text-[10px] font-bold text-green-700 uppercase"
+										>
 											Aktif
 										</span>
 									{/if}
 								</div>
 								<p class="mt-1 text-xs text-slate-500">
-									{item.phone ? `HP: ${item.phone}` : ''} {item.email ? `| Email: ${item.email}` : ''}
-									{item.start_date ? `| Masa: ${item.start_date} s/d ${item.finish_date || 'Sekarang'}` : ''}
+									{item.phone ? `HP: ${item.phone}` : ''}
+									{item.email ? `| Email: ${item.email}` : ''}
+									{item.start_date
+										? `| Masa: ${item.start_date} s/d ${item.finish_date || 'Sekarang'}`
+										: ''}
 								</p>
 							</div>
 
@@ -562,40 +580,77 @@
 	<form onsubmit={handleSaveOfficial} class="flex flex-col p-6 space-y-4">
 		<div class="grid gap-4 md:grid-cols-2">
 			<div class="space-y-1.5">
-				<label for="off-name" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Nama Lengkap</label>
-				<Input id="off-name" bind:value={officialForm.name} required placeholder="Contoh: Budi Santoso, S.IP" />
+				<label for="off-name" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+					>Nama Lengkap</label
+				>
+				<Input
+					id="off-name"
+					bind:value={officialForm.name}
+					required
+					placeholder="Contoh: Budi Santoso, S.IP"
+				/>
 			</div>
 			<div class="space-y-1.5">
-				<label for="off-pos" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Jabatan</label>
-				<Input id="off-pos" bind:value={officialForm.position} required placeholder="Contoh: sekretaris-desa" />
+				<label for="off-pos" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+					>Jabatan</label
+				>
+				<Input
+					id="off-pos"
+					bind:value={officialForm.position}
+					required
+					placeholder="Contoh: sekretaris-desa"
+				/>
 			</div>
 		</div>
 
 		<div class="grid gap-4 md:grid-cols-2">
 			<div class="space-y-1.5">
-				<label for="off-phone" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Telepon / HP</label>
+				<label
+					for="off-phone"
+					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Telepon / HP</label
+				>
 				<Input id="off-phone" bind:value={officialForm.phone} placeholder="08123456789" />
 			</div>
 			<div class="space-y-1.5">
-				<label for="off-email" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Email</label>
-				<Input id="off-email" type="email" bind:value={officialForm.email} placeholder="sekdes@cipicung.id" />
+				<label
+					for="off-email"
+					class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Email</label
+				>
+				<Input
+					id="off-email"
+					type="email"
+					bind:value={officialForm.email}
+					placeholder="sekdes@cipicung.id"
+				/>
 			</div>
 		</div>
 
 		<div class="grid gap-4 md:grid-cols-2">
 			<div class="space-y-1.5">
-				<label for="off-start" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Tanggal Mulai</label>
+				<label
+					for="off-start"
+					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+					>Tanggal Mulai</label
+				>
 				<Input id="off-start" type="date" bind:value={officialForm.start_date} />
 			</div>
 			<div class="space-y-1.5">
-				<label for="off-finish" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Tanggal Selesai</label>
+				<label
+					for="off-finish"
+					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+					>Tanggal Selesai</label
+				>
 				<Input id="off-finish" type="date" bind:value={officialForm.finish_date} />
 			</div>
 		</div>
 
 		<div class="grid gap-4 md:grid-cols-2 items-center">
 			<div class="space-y-1.5">
-				<label for="off-order" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">No Urut / Order</label>
+				<label
+					for="off-order"
+					class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+					>No Urut / Order</label
+				>
 				<Input id="off-order" type="number" bind:value={officialForm.order_number} />
 			</div>
 			<div class="flex items-center gap-2 pt-5">
@@ -611,12 +666,22 @@
 		</div>
 
 		<div class="space-y-1.5">
-			<label for="off-desc" class="block text-xs font-bold text-slate-500 uppercase tracking-wide">Keterangan / Deskripsi</label>
-			<Input id="off-desc" bind:value={officialForm.description} placeholder="Deskripsi tugas atau periode" />
+			<label for="off-desc" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
+				>Keterangan / Deskripsi</label
+			>
+			<Input
+				id="off-desc"
+				bind:value={officialForm.description}
+				placeholder="Deskripsi tugas atau periode"
+			/>
 		</div>
 
 		<div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-			<Button variant="outline" onclick={() => (isOfficialDialogOpen = false)} disabled={isSavingOfficial}>Batal</Button>
+			<Button
+				variant="outline"
+				onclick={() => (isOfficialDialogOpen = false)}
+				disabled={isSavingOfficial}>Batal</Button
+			>
 			<Button type="submit" disabled={isSavingOfficial}>
 				{#if isSavingOfficial}
 					<Loader2 size={16} class="animate-spin" />

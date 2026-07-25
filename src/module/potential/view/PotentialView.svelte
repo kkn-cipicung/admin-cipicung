@@ -192,11 +192,7 @@
 			<span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
 				<Search size={16} />
 			</span>
-			<Input
-				placeholder="Cari potensi..."
-				class="pl-9 bg-slate-50/50"
-				bind:value={searchQuery}
-			/>
+			<Input placeholder="Cari potensi..." class="pl-9 bg-slate-50/50" bind:value={searchQuery} />
 		</div>
 	</div>
 
@@ -316,7 +312,13 @@
 			<label for="edit-desc" class="block text-xs font-bold text-slate-500 uppercase tracking-wide"
 				>Deskripsi</label
 			>
-			<Textarea id="edit-desc" bind:value={editForm.description} rows={3} maxlength={255} required />
+			<Textarea
+				id="edit-desc"
+				bind:value={editForm.description}
+				rows={3}
+				maxlength={255}
+				required
+			/>
 		</div>
 
 		<div class="space-y-1.5">
@@ -339,7 +341,6 @@
 				{/if}
 			</div>
 		</div>
-
 
 		<div class="space-y-1.5">
 			<span class="block text-xs font-bold text-slate-500 uppercase tracking-wide"

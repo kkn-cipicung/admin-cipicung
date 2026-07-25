@@ -55,9 +55,7 @@
 	let filteredArticles = $derived(
 		articles.filter((article) => {
 			const catId = article.category_id || article.category?.id;
-			const matchesCategory = selectedCategoryId
-				? catId === Number(selectedCategoryId)
-				: true;
+			const matchesCategory = selectedCategoryId ? catId === Number(selectedCategoryId) : true;
 			const matchesSearch = searchQuery
 				? article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
 					article.description.toLowerCase().includes(searchQuery.toLowerCase())
