@@ -187,6 +187,10 @@
 		region: '',
 		hamlet_one: '',
 		hamlet_two: '',
+		rt_hamlet_one: '',
+		rt_hamlet_two: '',
+		rw_hamlet_one: '',
+		rw_hamlet_two: '',
 		north_border: '',
 		east_border: '',
 		south_border: '',
@@ -230,6 +234,22 @@
 					data.hamlet_one !== undefined && data.hamlet_one !== null ? String(data.hamlet_one) : '',
 				hamlet_two:
 					data.hamlet_two !== undefined && data.hamlet_two !== null ? String(data.hamlet_two) : '',
+				rt_hamlet_one:
+					data.rt_hamlet_one !== undefined && data.rt_hamlet_one !== null
+						? String(data.rt_hamlet_one)
+						: '',
+				rt_hamlet_two:
+					data.rt_hamlet_two !== undefined && data.rt_hamlet_two !== null
+						? String(data.rt_hamlet_two)
+						: '',
+				rw_hamlet_one:
+					data.rw_hamlet_one !== undefined && data.rw_hamlet_one !== null
+						? String(data.rw_hamlet_one)
+						: '',
+				rw_hamlet_two:
+					data.rw_hamlet_two !== undefined && data.rw_hamlet_two !== null
+						? String(data.rw_hamlet_two)
+						: '',
 				north_border: data.north_border || '',
 				east_border: data.east_border || '',
 				south_border: data.south_border || '',
@@ -308,6 +328,30 @@
 				form.hamlet_two !== '' && form.hamlet_two !== null && form.hamlet_two !== undefined
 					? Math.floor(Number(form.hamlet_two))
 					: undefined,
+			rt_hamlet_one:
+				form.rt_hamlet_one !== '' &&
+				form.rt_hamlet_one !== null &&
+				form.rt_hamlet_one !== undefined
+					? Math.floor(Number(form.rt_hamlet_one))
+					: undefined,
+			rt_hamlet_two:
+				form.rt_hamlet_two !== '' &&
+				form.rt_hamlet_two !== null &&
+				form.rt_hamlet_two !== undefined
+					? Math.floor(Number(form.rt_hamlet_two))
+					: undefined,
+			rw_hamlet_one:
+				form.rw_hamlet_one !== '' &&
+				form.rw_hamlet_one !== null &&
+				form.rw_hamlet_one !== undefined
+					? Math.floor(Number(form.rw_hamlet_one))
+					: undefined,
+			rw_hamlet_two:
+				form.rw_hamlet_two !== '' &&
+				form.rw_hamlet_two !== null &&
+				form.rw_hamlet_two !== undefined
+					? Math.floor(Number(form.rw_hamlet_two))
+					: undefined,
 			north_border: form.north_border || undefined,
 			east_border: form.east_border || undefined,
 			south_border: form.south_border || undefined,
@@ -360,8 +404,10 @@
 				<FloatingInput bind:value={form.phone} label="Telepon" />
 				<FloatingInput bind:value={form.email} label="Email" />
 				<FloatingInput bind:value={form.region} label="Wilayah" />
-				<FloatingInput type="number" bind:value={form.hamlet_one} label="Populasi Dusun 1" />
-				<FloatingInput type="number" bind:value={form.hamlet_two} label="Populasi Dusun 2" />
+				<FloatingInput type="number" bind:value={form.rt_hamlet_one} label="RT Dusun 1" />
+				<FloatingInput type="number" bind:value={form.rt_hamlet_two} label="RT Dusun 2" />
+				<FloatingInput type="number" bind:value={form.rw_hamlet_one} label="RW Dusun 1" />
+				<FloatingInput type="number" bind:value={form.rw_hamlet_two} label="RW Dusun 2" />
 				<FloatingInput bind:value={form.north_border} label="Batas utara" />
 				<FloatingInput bind:value={form.east_border} label="Batas timur" />
 				<FloatingInput bind:value={form.south_border} label="Batas selatan" />
@@ -621,20 +667,52 @@
 						</div>
 					</div>
 
-					{#if regionQuery.data?.data?.hamlet_one !== undefined || regionQuery.data?.data?.hamlet_two !== undefined}
+					{#if regionQuery.data?.data?.total_family !== undefined}
 						<div
-							class="flex items-center justify-between rounded-lg border border-emerald-100/80 bg-emerald-50/40 p-2.5 text-xs"
+							class="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 p-2.5 text-xs"
 						>
-							<div class="flex items-center gap-2 font-medium text-emerald-800">
-								<Users size={14} class="text-emerald-600" />
-								<span>Dusun 1 / Dusun 2</span>
+							<div class="flex items-center gap-2 font-medium text-slate-700">
+								<Users size={14} class="text-slate-500" />
+								<span>Jumlah KK</span>
 							</div>
-							<div class="font-bold text-emerald-900">
-								{regionQuery.data?.data?.hamlet_one || 0} / {regionQuery.data?.data?.hamlet_two ||
-									0} jiwa
+							<div class="font-bold text-slate-900">
+								{regionQuery.data?.data?.total_family || 0} KK
 							</div>
 						</div>
 					{/if}
+
+					<div class="grid grid-cols-2 gap-2">
+						<div class="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
+							<span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400"
+								>RT / RW Dusun 1</span
+							>
+							<span class="mt-0.5 block text-xs font-bold text-slate-900">
+								{regionQuery.data?.data?.rt_hamlet_one || 0} /
+								{regionQuery.data?.data?.rw_hamlet_one || 0}
+							</span>
+						</div>
+						<div class="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
+							<span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400"
+								>RT / RW Dusun 2</span
+							>
+							<span class="mt-0.5 block text-xs font-bold text-slate-900">
+								{regionQuery.data?.data?.rt_hamlet_two || 0} /
+								{regionQuery.data?.data?.rw_hamlet_two || 0}
+							</span>
+						</div>
+					</div>
+
+					<div
+						class="flex items-center justify-between rounded-lg border border-emerald-100/80 bg-emerald-50/40 p-2.5 text-xs"
+					>
+						<div class="flex items-center gap-2 font-medium text-emerald-800">
+							<Users size={14} class="text-emerald-600" />
+							<span>Total RT / RW</span>
+						</div>
+						<div class="font-bold text-emerald-900">
+							{regionQuery.data?.data?.total_rt || 0} / {regionQuery.data?.data?.total_rw || 0}
+						</div>
+					</div>
 
 					{#if regionQuery.data?.data?.north_border || regionQuery.data?.data?.east_border || regionQuery.data?.data?.south_border || regionQuery.data?.data?.west_border}
 						<div>
