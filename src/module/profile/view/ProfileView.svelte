@@ -329,27 +329,19 @@
 					? Math.floor(Number(form.hamlet_two))
 					: undefined,
 			rt_hamlet_one:
-				form.rt_hamlet_one !== '' &&
-				form.rt_hamlet_one !== null &&
-				form.rt_hamlet_one !== undefined
+				form.rt_hamlet_one !== '' && form.rt_hamlet_one !== null && form.rt_hamlet_one !== undefined
 					? Math.floor(Number(form.rt_hamlet_one))
 					: undefined,
 			rt_hamlet_two:
-				form.rt_hamlet_two !== '' &&
-				form.rt_hamlet_two !== null &&
-				form.rt_hamlet_two !== undefined
+				form.rt_hamlet_two !== '' && form.rt_hamlet_two !== null && form.rt_hamlet_two !== undefined
 					? Math.floor(Number(form.rt_hamlet_two))
 					: undefined,
 			rw_hamlet_one:
-				form.rw_hamlet_one !== '' &&
-				form.rw_hamlet_one !== null &&
-				form.rw_hamlet_one !== undefined
+				form.rw_hamlet_one !== '' && form.rw_hamlet_one !== null && form.rw_hamlet_one !== undefined
 					? Math.floor(Number(form.rw_hamlet_one))
 					: undefined,
 			rw_hamlet_two:
-				form.rw_hamlet_two !== '' &&
-				form.rw_hamlet_two !== null &&
-				form.rw_hamlet_two !== undefined
+				form.rw_hamlet_two !== '' && form.rw_hamlet_two !== null && form.rw_hamlet_two !== undefined
 					? Math.floor(Number(form.rw_hamlet_two))
 					: undefined,
 			north_border: form.north_border || undefined,
