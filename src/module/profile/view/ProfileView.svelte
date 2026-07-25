@@ -19,7 +19,18 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
 	import ConfirmDialog from '$lib/components/ui/ConfirmDialog.svelte';
-	import { CheckCircle2, Landmark, Loader2, MapPin, Pencil, Plus, Sparkles, Target, Trash2, Users } from '@lucide/svelte';
+	import {
+		CheckCircle2,
+		Landmark,
+		Loader2,
+		MapPin,
+		Pencil,
+		Plus,
+		Sparkles,
+		Target,
+		Trash2,
+		Users
+	} from '@lucide/svelte';
 	import { toast } from '$lib/stores/toast.svelte';
 
 	type HeadmanForm = {
@@ -548,12 +559,14 @@
 								<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400"
 									>Misi Utama</span
 								>
-								<span class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+								<span
+									class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700"
+								>
 									{visionQuery.data.data.mission.length} Poin
 								</span>
 							</div>
 							<ul class="space-y-1.5">
-								{#each visionQuery.data.data.mission as item}
+								{#each visionQuery.data.data.mission as item, index (index)}
 									<li class="flex items-start gap-2 text-xs text-slate-600">
 										<CheckCircle2 size={14} class="mt-0.5 shrink-0 text-blue-500" />
 										<span class="leading-tight">{item}</span>
@@ -617,14 +630,16 @@
 								<span>Dusun 1 / Dusun 2</span>
 							</div>
 							<div class="font-bold text-emerald-900">
-								{regionQuery.data?.data?.hamlet_one || 0} / {regionQuery.data?.data?.hamlet_two || 0} jiwa
+								{regionQuery.data?.data?.hamlet_one || 0} / {regionQuery.data?.data?.hamlet_two ||
+									0} jiwa
 							</div>
 						</div>
 					{/if}
 
 					{#if regionQuery.data?.data?.north_border || regionQuery.data?.data?.east_border || regionQuery.data?.data?.south_border || regionQuery.data?.data?.west_border}
 						<div>
-							<span class="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-400"
+							<span
+								class="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-slate-400"
 								>Batas Perbatasan</span
 							>
 							<div class="grid grid-cols-2 gap-1.5 text-[11px]">
@@ -689,7 +704,7 @@
 					</div>
 				{:else if governmentQuery.data?.data && governmentQuery.data.data.length > 0}
 					<div class="space-y-2">
-						{#each governmentQuery.data.data.slice(0, 4) as member}
+						{#each governmentQuery.data.data.slice(0, 4) as member, index (index)}
 							<div
 								class="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/60 p-2.5"
 							>
