@@ -139,7 +139,7 @@
 					{contactDetail.contact.email || '-'}
 				</p>
 				<div>
-					{#each contactDetail.social_media as item}
+					{#each contactDetail.social_media as item (item.name + item.username)}
 						<p>{item.name}: {item.username}</p>
 					{/each}
 				</div>
