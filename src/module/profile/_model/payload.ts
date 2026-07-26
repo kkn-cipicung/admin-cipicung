@@ -22,6 +22,7 @@ export const ProfilePayloadSchema = z.object({
 	history: z.string().optional(),
 	description: z.string().optional(),
 	region: z.string().optional(),
+	total_family: z.number().optional(),
 	hamlet_one: z.number().optional(),
 	hamlet_two: z.number().optional(),
 	rt_hamlet_one: z.number().optional(),
@@ -33,6 +34,21 @@ export const ProfilePayloadSchema = z.object({
 	south_border: z.string().optional(),
 	west_border: z.string().optional(),
 	area: z.string().optional(),
+	total_male: z.number().optional(),
+	total_female: z.number().optional(),
+	demographic_religions: z
+		.array(z.object({ label: z.string(), value: z.number(), color: z.string().optional() }))
+		.optional(),
+	demographic_religion_rt: z
+		.array(z.object({ label: z.string(), value: z.number(), value2: z.number().optional() }))
+		.optional(),
+	demographic_education: z
+		.array(z.object({ label: z.string(), male: z.number(), female: z.number() }))
+		.optional(),
+	demographic_occupation: z
+		.array(z.object({ label: z.string(), male: z.number(), female: z.number() }))
+		.optional(),
+	demographic_ages: z.array(z.object({ label: z.string(), value: z.number() })).optional(),
 	latitude: z.number().optional(),
 	longitude: z.number().optional(),
 	mission: z.array(z.string()).optional(),

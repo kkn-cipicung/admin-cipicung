@@ -40,6 +40,9 @@
 		finish_date: string;
 		is_active: boolean;
 	};
+	type DemoSliceForm = { label: string; value: string; color?: string };
+	type DemoBarForm = { label: string; value: string; value2: string };
+	type DemoGenderBarForm = { label: string; male: string; female: string };
 
 	function formatPosition(pos?: string): string {
 		if (!pos) return '-';
@@ -185,6 +188,7 @@
 		history: '',
 		description: '',
 		region: '',
+		total_family: '',
 		hamlet_one: '',
 		hamlet_two: '',
 		rt_hamlet_one: '',
@@ -196,6 +200,13 @@
 		south_border: '',
 		west_border: '',
 		area: '',
+		total_male: '',
+		total_female: '',
+		demographic_religions: [] as DemoSliceForm[],
+		demographic_religion_rt: [] as DemoBarForm[],
+		demographic_education: [] as DemoGenderBarForm[],
+		demographic_occupation: [] as DemoGenderBarForm[],
+		demographic_ages: [] as DemoSliceForm[],
 		latitude: '',
 		longitude: '',
 		headmen: [
@@ -211,6 +222,113 @@
 	let profileId = $state<number | null>(null);
 	let hasHydrated = $state(false);
 	let isSaving = $state(false);
+
+	function toStringValue(value: unknown) {
+		return value !== undefined && value !== null ? String(value) : '';
+	}
+
+	function mapSliceRows(items: { label: string; value: number; color?: string }[] | undefined) {
+		return (items || []).map((item) => ({
+			label: item.label || '',
+			value: toStringValue(item.value),
+			color: item.color || ''
+		}));
+	}
+
+	function mapBarRows(items: { label: string; value: number; value2?: number }[] | undefined) {
+		return (items || []).map((item) => ({
+			label: item.label || '',
+			value: toStringValue(item.value),
+			value2: toStringValue(item.value2)
+		}));
+	}
+
+	function mapGenderRows(items: { label: string; male: number; female: number }[] | undefined) {
+		return (items || []).map((item) => ({
+			label: item.label || '',
+			male: toStringValue(item.male),
+			female: toStringValue(item.female)
+		}));
+	}
+
+	function serializeSliceRows(items: DemoSliceForm[]) {
+		return items
+			.filter((item) => item.label.trim())
+			.map((item) => ({
+				label: item.label.trim(),
+				value: Math.floor(Number(item.value)) || 0,
+				...(item.color?.trim() ? { color: item.color.trim() } : {})
+			}));
+	}
+
+	function serializeBarRows(items: DemoBarForm[]) {
+		return items
+			.filter((item) => item.label.trim())
+			.map((item) => ({
+				label: item.label.trim(),
+				value: Math.floor(Number(item.value)) || 0,
+				value2: Math.floor(Number(item.value2)) || 0
+			}));
+	}
+
+	function serializeGenderRows(items: DemoGenderBarForm[]) {
+		return items
+			.filter((item) => item.label.trim())
+			.map((item) => ({
+				label: item.label.trim(),
+				male: Math.floor(Number(item.male)) || 0,
+				female: Math.floor(Number(item.female)) || 0
+			}));
+	}
+
+	function addReligion() {
+		form.demographic_religions = [...form.demographic_religions, { label: '', value: '', color: '' }];
+	}
+
+	function removeReligion(index: number) {
+		form.demographic_religions = form.demographic_religions.filter((_, itemIndex) => itemIndex !== index);
+	}
+
+	function addReligionRT() {
+		form.demographic_religion_rt = [
+			...form.demographic_religion_rt,
+			{ label: '', value: '', value2: '' }
+		];
+	}
+
+	function removeReligionRT(index: number) {
+		form.demographic_religion_rt = form.demographic_religion_rt.filter((_, itemIndex) => itemIndex !== index);
+	}
+
+	function addEducation() {
+		form.demographic_education = [
+			...form.demographic_education,
+			{ label: '', male: '', female: '' }
+		];
+	}
+
+	function removeEducation(index: number) {
+		form.demographic_education = form.demographic_education.filter((_, itemIndex) => itemIndex !== index);
+	}
+
+	function addOccupation() {
+		form.demographic_occupation = [
+			...form.demographic_occupation,
+			{ label: '', male: '', female: '' }
+		];
+	}
+
+	function removeOccupation(index: number) {
+		form.demographic_occupation = form.demographic_occupation.filter((_, itemIndex) => itemIndex !== index);
+	}
+
+	function addAge() {
+		form.demographic_ages = [...form.demographic_ages, { label: '', value: '' }];
+	}
+
+	function removeAge(index: number) {
+		form.demographic_ages = form.demographic_ages.filter((_, itemIndex) => itemIndex !== index);
+	}
 
 	$effect(() => {
 		const data = profileQuery.data?.data;
@@ -230,6 +348,10 @@
 				history: data.history || '',
 				description: data.description || '',
 				region: data.region || '',
+				total_family:
+					data.total_family !== undefined && data.total_family !== null
+						? String(data.total_family)
+						: '',
 				hamlet_one:
 					data.hamlet_one !== undefined && data.hamlet_one !== null ? String(data.hamlet_one) : '',
 				hamlet_two:
@@ -255,6 +377,19 @@
 				south_border: data.south_border || '',
 				west_border: data.west_border || '',
 				area: data.area || '',
+				total_male:
+					data.total_male !== undefined && data.total_male !== null
+						? String(data.total_male)
+						: '',
+				total_female:
+					data.total_female !== undefined && data.total_female !== null
+						? String(data.total_female)
+						: '',
+				demographic_religions: mapSliceRows(data.demographic_religions),
+				demographic_religion_rt: mapBarRows(data.demographic_religion_rt),
+				demographic_education: mapGenderRows(data.demographic_education),
+				demographic_occupation: mapGenderRows(data.demographic_occupation),
+				demographic_ages: mapSliceRows(data.demographic_ages),
 				latitude:
 					data.latitude !== undefined && data.latitude !== null ? String(data.latitude) : '',
 				longitude:
@@ -320,6 +455,10 @@
 			history: form.history || undefined,
 			description: form.description || undefined,
 			region: form.region || undefined,
+			total_family:
+				form.total_family !== '' && form.total_family !== null && form.total_family !== undefined
+					? Math.floor(Number(form.total_family))
+					: undefined,
 			hamlet_one:
 				form.hamlet_one !== '' && form.hamlet_one !== null && form.hamlet_one !== undefined
 					? Math.floor(Number(form.hamlet_one))
@@ -349,6 +488,19 @@
 			south_border: form.south_border || undefined,
 			west_border: form.west_border || undefined,
 			area: form.area || undefined,
+			total_male:
+				form.total_male !== '' && form.total_male !== null && form.total_male !== undefined
+					? Math.floor(Number(form.total_male))
+					: undefined,
+			total_female:
+				form.total_female !== '' && form.total_female !== null && form.total_female !== undefined
+					? Math.floor(Number(form.total_female))
+					: undefined,
+			demographic_religions: serializeSliceRows(form.demographic_religions),
+			demographic_religion_rt: serializeBarRows(form.demographic_religion_rt),
+			demographic_education: serializeGenderRows(form.demographic_education),
+			demographic_occupation: serializeGenderRows(form.demographic_occupation),
+			demographic_ages: serializeSliceRows(form.demographic_ages),
 			latitude: form.latitude ? Number(form.latitude) : undefined,
 			longitude: form.longitude ? Number(form.longitude) : undefined,
 			headmen: form.headmen
@@ -396,6 +548,9 @@
 				<FloatingInput bind:value={form.phone} label="Telepon" />
 				<FloatingInput bind:value={form.email} label="Email" />
 				<FloatingInput bind:value={form.region} label="Wilayah" />
+				<FloatingInput type="number" bind:value={form.total_family} label="Jumlah KK" />
+				<FloatingInput type="number" bind:value={form.hamlet_one} label="Penduduk Dusun 1" />
+				<FloatingInput type="number" bind:value={form.hamlet_two} label="Penduduk Dusun 2" />
 				<FloatingInput type="number" bind:value={form.rt_hamlet_one} label="RT Dusun 1" />
 				<FloatingInput type="number" bind:value={form.rt_hamlet_two} label="RT Dusun 2" />
 				<FloatingInput type="number" bind:value={form.rw_hamlet_one} label="RW Dusun 1" />
@@ -405,6 +560,8 @@
 				<FloatingInput bind:value={form.south_border} label="Batas selatan" />
 				<FloatingInput bind:value={form.west_border} label="Batas barat" />
 				<FloatingInput bind:value={form.area} label="Luas wilayah" />
+				<FloatingInput type="number" bind:value={form.total_male} label="Jumlah laki-laki" />
+				<FloatingInput type="number" bind:value={form.total_female} label="Jumlah perempuan" />
 				<FloatingInput
 					type="number"
 					step="any"
@@ -423,6 +580,184 @@
 			<FloatingTextarea bind:value={form.history} label="Sejarah" rows={3} />
 			<FloatingTextarea bind:value={form.vision} label="Visi" rows={3} />
 			<FloatingTextarea bind:value={form.mission} label="Misi, satu baris per poin" rows={5} />
+
+			<section class="space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+				<div>
+					<h3 class="text-sm font-bold text-slate-900">Data Infografis</h3>
+					<p class="mt-0.5 text-xs font-medium text-slate-500">
+						Kelola data demografi detail untuk halaman infografis publik.
+					</p>
+				</div>
+				<div class="grid gap-4 lg:grid-cols-2">
+					<div class="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
+						<div class="flex items-center justify-between gap-3">
+							<h4 class="text-xs font-bold uppercase tracking-wide text-slate-600">Agama</h4>
+							<Button type="button" size="sm" variant="outline" onclick={addReligion}>
+								<Plus size={14} />Tambah
+							</Button>
+						</div>
+						{#if form.demographic_religions.length === 0}
+							<p class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400">
+								Belum ada data agama.
+							</p>
+						{:else}
+							<div class="space-y-2">
+								{#each form.demographic_religions as item, index (index)}
+									<div class="grid grid-cols-[minmax(0,1fr)_8rem_2.5rem] gap-2">
+										<FloatingInput bind:value={item.label} label="Agama" />
+										<FloatingInput type="number" bind:value={item.value} label="Jumlah" />
+										<Button
+											type="button"
+											variant="outline"
+											size="icon"
+											class="mt-1 h-12 hover:border-red-200 hover:bg-red-50 hover:text-red-650"
+											onclick={() => removeReligion(index)}
+											title="Hapus agama"
+										>
+											<Trash2 size={14} />
+										</Button>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</div>
+
+					<div class="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
+						<div class="flex items-center justify-between gap-3">
+							<h4 class="text-xs font-bold uppercase tracking-wide text-slate-600">Agama per RT</h4>
+							<Button type="button" size="sm" variant="outline" onclick={addReligionRT}>
+								<Plus size={14} />Tambah
+							</Button>
+						</div>
+						{#if form.demographic_religion_rt.length === 0}
+							<p class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400">
+								Belum ada data agama per RT.
+							</p>
+						{:else}
+							<div class="space-y-2">
+								{#each form.demographic_religion_rt as item, index (index)}
+									<div class="grid grid-cols-[minmax(0,1fr)_6rem_6rem_2.5rem] gap-2">
+										<FloatingInput bind:value={item.label} label="RT" />
+										<FloatingInput type="number" bind:value={item.value} label="Islam" />
+										<FloatingInput type="number" bind:value={item.value2} label="Kristen" />
+										<Button
+											type="button"
+											variant="outline"
+											size="icon"
+											class="mt-1 h-12 hover:border-red-200 hover:bg-red-50 hover:text-red-650"
+											onclick={() => removeReligionRT(index)}
+											title="Hapus RT"
+										>
+											<Trash2 size={14} />
+										</Button>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</div>
+
+					<div class="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
+						<div class="flex items-center justify-between gap-3">
+							<h4 class="text-xs font-bold uppercase tracking-wide text-slate-600">Pendidikan</h4>
+							<Button type="button" size="sm" variant="outline" onclick={addEducation}>
+								<Plus size={14} />Tambah
+							</Button>
+						</div>
+						{#if form.demographic_education.length === 0}
+							<p class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400">
+								Belum ada data pendidikan.
+							</p>
+						{:else}
+							<div class="space-y-2">
+								{#each form.demographic_education as item, index (index)}
+									<div class="grid grid-cols-[minmax(0,1fr)_6rem_6rem_2.5rem] gap-2">
+										<FloatingInput bind:value={item.label} label="Pendidikan" />
+										<FloatingInput type="number" bind:value={item.male} label="Laki-laki" />
+										<FloatingInput type="number" bind:value={item.female} label="Perempuan" />
+										<Button
+											type="button"
+											variant="outline"
+											size="icon"
+											class="mt-1 h-12 hover:border-red-200 hover:bg-red-50 hover:text-red-650"
+											onclick={() => removeEducation(index)}
+											title="Hapus pendidikan"
+										>
+											<Trash2 size={14} />
+										</Button>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</div>
+
+					<div class="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
+						<div class="flex items-center justify-between gap-3">
+							<h4 class="text-xs font-bold uppercase tracking-wide text-slate-600">Pekerjaan</h4>
+							<Button type="button" size="sm" variant="outline" onclick={addOccupation}>
+								<Plus size={14} />Tambah
+							</Button>
+						</div>
+						{#if form.demographic_occupation.length === 0}
+							<p class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400">
+								Belum ada data pekerjaan.
+							</p>
+						{:else}
+							<div class="space-y-2">
+								{#each form.demographic_occupation as item, index (index)}
+									<div class="grid grid-cols-[minmax(0,1fr)_6rem_6rem_2.5rem] gap-2">
+										<FloatingInput bind:value={item.label} label="Pekerjaan" />
+										<FloatingInput type="number" bind:value={item.male} label="Laki-laki" />
+										<FloatingInput type="number" bind:value={item.female} label="Perempuan" />
+										<Button
+											type="button"
+											variant="outline"
+											size="icon"
+											class="mt-1 h-12 hover:border-red-200 hover:bg-red-50 hover:text-red-650"
+											onclick={() => removeOccupation(index)}
+											title="Hapus pekerjaan"
+										>
+											<Trash2 size={14} />
+										</Button>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</div>
+
+					<div class="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
+						<div class="flex items-center justify-between gap-3">
+							<h4 class="text-xs font-bold uppercase tracking-wide text-slate-600">Kelompok Usia</h4>
+							<Button type="button" size="sm" variant="outline" onclick={addAge}>
+								<Plus size={14} />Tambah
+							</Button>
+						</div>
+						{#if form.demographic_ages.length === 0}
+							<p class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400">
+								Belum ada data kelompok usia.
+							</p>
+						{:else}
+							<div class="space-y-2">
+								{#each form.demographic_ages as item, index (index)}
+									<div class="grid grid-cols-[minmax(0,1fr)_8rem_2.5rem] gap-2">
+										<FloatingInput bind:value={item.label} label="Kelompok usia" />
+										<FloatingInput type="number" bind:value={item.value} label="Jumlah" />
+										<Button
+											type="button"
+											variant="outline"
+											size="icon"
+											class="mt-1 h-12 hover:border-red-200 hover:bg-red-50 hover:text-red-650"
+											onclick={() => removeAge(index)}
+											title="Hapus usia"
+										>
+											<Trash2 size={14} />
+										</Button>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</div>
+				</div>
+			</section>
 
 			<section class="space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
 				<div class="flex items-center justify-between gap-3">
