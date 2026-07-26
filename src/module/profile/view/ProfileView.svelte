@@ -222,6 +222,7 @@
 	let profileId = $state<number | null>(null);
 	let hasHydrated = $state(false);
 	let isSaving = $state(false);
+	let savingSection = $state('');
 
 	function toStringValue(value: unknown) {
 		return value !== undefined && value !== null ? String(value) : '';
@@ -443,9 +444,11 @@
 		form.headmen = form.headmen.filter((_, itemIndex) => itemIndex !== index);
 	}
 
-	async function save(event: Event) {
+	async function save(event: SubmitEvent) {
 		event.preventDefault();
 		isSaving = true;
+		const submitter = event.submitter as HTMLButtonElement | null;
+		savingSection = submitter?.value || 'Profil';
 		const payload = {
 			...(profileId ? { id: profileId } : {}),
 			name: form.name,
@@ -525,13 +528,14 @@
 		try {
 			await saveProfile(payload);
 			await queryClient.invalidateQueries({ queryKey: ['profile'] });
-			toast.success({ title: 'Berhasil!', message: 'Profil desa berhasil disimpan.' });
+			toast.success({ title: 'Berhasil!', message: `${savingSection} berhasil disimpan.` });
 		} catch (error) {
 			const err = error as { apiResponse?: { message?: string }; message?: string };
 			const msg = err.apiResponse?.message || err.message || 'Terjadi kesalahan.';
 			toast.error({ title: 'Gagal menyimpan', message: msg });
 		} finally {
 			isSaving = false;
+			savingSection = '';
 		}
 	}
 </script>
@@ -548,47 +552,76 @@
 					Kelola identitas, visi misi, wilayah, dan kepala desa.
 				</p>
 			</div>
-			<div class="grid gap-4 md:grid-cols-3">
-				<FloatingInput bind:value={form.name} label="Nama desa" required />
-				<FloatingInput bind:value={form.province} label="Provinsi" required />
-				<FloatingInput bind:value={form.regency} label="Kabupaten" required />
-				<FloatingInput bind:value={form.district} label="Kecamatan" required />
-				<FloatingInput bind:value={form.postal_code} label="Kode pos" />
-				<FloatingInput bind:value={form.phone} label="Telepon" />
-				<FloatingInput bind:value={form.email} label="Email" />
-				<FloatingInput bind:value={form.region} label="Wilayah" />
-				<FloatingInput type="number" bind:value={form.total_family} label="Jumlah KK" />
-				<FloatingInput type="number" bind:value={form.hamlet_one} label="Penduduk Dusun 1" />
-				<FloatingInput type="number" bind:value={form.hamlet_two} label="Penduduk Dusun 2" />
-				<FloatingInput type="number" bind:value={form.rt_hamlet_one} label="RT Dusun 1" />
-				<FloatingInput type="number" bind:value={form.rt_hamlet_two} label="RT Dusun 2" />
-				<FloatingInput type="number" bind:value={form.rw_hamlet_one} label="RW Dusun 1" />
-				<FloatingInput type="number" bind:value={form.rw_hamlet_two} label="RW Dusun 2" />
-				<FloatingInput bind:value={form.north_border} label="Batas utara" />
-				<FloatingInput bind:value={form.east_border} label="Batas timur" />
-				<FloatingInput bind:value={form.south_border} label="Batas selatan" />
-				<FloatingInput bind:value={form.west_border} label="Batas barat" />
-				<FloatingInput bind:value={form.area} label="Luas wilayah" />
-				<FloatingInput type="number" bind:value={form.total_male} label="Jumlah laki-laki" />
-				<FloatingInput type="number" bind:value={form.total_female} label="Jumlah perempuan" />
-				<FloatingInput
-					type="number"
-					step="any"
-					bind:value={form.latitude}
-					label="Latitude (-6.6075°)"
-				/>
-				<FloatingInput
-					type="number"
-					step="any"
-					bind:value={form.longitude}
-					label="Longitude (107.37667°)"
-				/>
+			<div class="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+				<div class="mb-4">
+					<h3 class="text-sm font-bold text-slate-900">Identitas & Wilayah</h3>
+					<p class="mt-0.5 text-xs font-medium text-slate-500">
+						Data dasar desa, alamat, batas wilayah, dan statistik ringkas penduduk.
+					</p>
+				</div>
+				<div class="grid gap-4 md:grid-cols-3">
+					<FloatingInput bind:value={form.name} label="Nama desa" required />
+					<FloatingInput bind:value={form.province} label="Provinsi" required />
+					<FloatingInput bind:value={form.regency} label="Kabupaten" required />
+					<FloatingInput bind:value={form.district} label="Kecamatan" required />
+					<FloatingInput bind:value={form.postal_code} label="Kode pos" />
+					<FloatingInput bind:value={form.phone} label="Telepon" />
+					<FloatingInput bind:value={form.email} label="Email" />
+					<FloatingInput bind:value={form.region} label="Wilayah" />
+					<FloatingInput type="number" bind:value={form.total_family} label="Jumlah KK" />
+					<FloatingInput type="number" bind:value={form.hamlet_one} label="Penduduk Dusun 1" />
+					<FloatingInput type="number" bind:value={form.hamlet_two} label="Penduduk Dusun 2" />
+					<FloatingInput type="number" bind:value={form.rt_hamlet_one} label="RT Dusun 1" />
+					<FloatingInput type="number" bind:value={form.rt_hamlet_two} label="RT Dusun 2" />
+					<FloatingInput type="number" bind:value={form.rw_hamlet_one} label="RW Dusun 1" />
+					<FloatingInput type="number" bind:value={form.rw_hamlet_two} label="RW Dusun 2" />
+					<FloatingInput bind:value={form.north_border} label="Batas utara" />
+					<FloatingInput bind:value={form.east_border} label="Batas timur" />
+					<FloatingInput bind:value={form.south_border} label="Batas selatan" />
+					<FloatingInput bind:value={form.west_border} label="Batas barat" />
+					<FloatingInput bind:value={form.area} label="Luas wilayah" />
+					<FloatingInput type="number" bind:value={form.total_male} label="Jumlah laki-laki" />
+					<FloatingInput type="number" bind:value={form.total_female} label="Jumlah perempuan" />
+					<FloatingInput
+						type="number"
+						step="any"
+						bind:value={form.latitude}
+						label="Latitude (-6.6075°)"
+					/>
+					<FloatingInput
+						type="number"
+						step="any"
+						bind:value={form.longitude}
+						label="Longitude (107.37667°)"
+					/>
+				</div>
+				<FloatingInput bind:value={form.address} label="Alamat" required />
+				<div class="mt-4 flex justify-end">
+					<Button type="submit" name="section" value="Identitas & wilayah" disabled={isSaving}>
+						{isSaving && savingSection === 'Identitas & wilayah'
+							? 'Menyimpan...'
+							: 'Simpan Identitas & Wilayah'}
+					</Button>
+				</div>
 			</div>
-			<FloatingInput bind:value={form.address} label="Alamat" required />
-			<FloatingTextarea bind:value={form.description} label="Deskripsi desa" rows={3} />
-			<FloatingTextarea bind:value={form.history} label="Sejarah" rows={3} />
-			<FloatingTextarea bind:value={form.vision} label="Visi" rows={3} />
-			<FloatingTextarea bind:value={form.mission} label="Misi, satu baris per poin" rows={5} />
+
+			<section class="space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+				<div>
+					<h3 class="text-sm font-bold text-slate-900">Narasi Desa</h3>
+					<p class="mt-0.5 text-xs font-medium text-slate-500">
+						Deskripsi, sejarah, visi, dan misi yang tampil di profil publik.
+					</p>
+				</div>
+				<FloatingTextarea bind:value={form.description} label="Deskripsi desa" rows={3} />
+				<FloatingTextarea bind:value={form.history} label="Sejarah" rows={3} />
+				<FloatingTextarea bind:value={form.vision} label="Visi" rows={3} />
+				<FloatingTextarea bind:value={form.mission} label="Misi, satu baris per poin" rows={5} />
+				<div class="flex justify-end">
+					<Button type="submit" name="section" value="Narasi desa" disabled={isSaving}>
+						{isSaving && savingSection === 'Narasi desa' ? 'Menyimpan...' : 'Simpan Narasi'}
+					</Button>
+				</div>
+			</section>
 
 			<section class="space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
 				<div>
@@ -778,6 +811,11 @@
 						{/if}
 					</div>
 				</div>
+				<div class="flex justify-end">
+					<Button type="submit" name="section" value="Data infografis" disabled={isSaving}>
+						{isSaving && savingSection === 'Data infografis' ? 'Menyimpan...' : 'Simpan Infografis'}
+					</Button>
+				</div>
 			</section>
 
 			<section class="space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
@@ -836,13 +874,12 @@
 						</div>
 					{/each}
 				</div>
+				<div class="flex justify-end">
+					<Button type="submit" name="section" value="Kepala desa" disabled={isSaving}>
+						{isSaving && savingSection === 'Kepala desa' ? 'Menyimpan...' : 'Simpan Kepala Desa'}
+					</Button>
+				</div>
 			</section>
-
-			<div class="flex justify-end">
-				<Button type="submit" disabled={isSaving}
-					>{isSaving ? 'Menyimpan...' : 'Simpan Profil'}</Button
-				>
-			</div>
 		</form>
 
 		<!-- Perangkat Desa / Officials Section -->

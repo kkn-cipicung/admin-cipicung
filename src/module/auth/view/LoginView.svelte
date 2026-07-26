@@ -137,12 +137,7 @@
 		</form>
 
 		<div class="text-center pt-2 border-t border-slate-100">
-			<p class="text-xs font-semibold text-slate-400">
-				Belum memiliki akun admin?
-				<a href="/auth/register" class="text-blue-600 hover:text-blue-700 transition-colors"
-					>Daftar disini</a
-				>
-			</p>
+			<p class="text-xs font-semibold text-slate-400">Portal Admin Desa Cipicung</p>
 		</div>
 	</div>
 </div>
