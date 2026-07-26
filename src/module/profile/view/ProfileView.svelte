@@ -207,6 +207,8 @@
 		demographic_education: [] as DemoGenderBarForm[],
 		demographic_occupation: [] as DemoGenderBarForm[],
 		demographic_ages: [] as DemoSliceForm[],
+		resource_potential_title: '',
+		resource_potential_detail: '',
 		latitude: '',
 		longitude: '',
 		headmen: [
@@ -400,6 +402,8 @@
 				demographic_education: mapGenderRows(data.demographic_education),
 				demographic_occupation: mapGenderRows(data.demographic_occupation),
 				demographic_ages: mapSliceRows(data.demographic_ages),
+				resource_potential_title: data.resource_potential_title || '',
+				resource_potential_detail: data.resource_potential_detail || '',
 				latitude:
 					data.latitude !== undefined && data.latitude !== null ? String(data.latitude) : '',
 				longitude:
@@ -424,6 +428,21 @@
 							]
 			};
 			hasHydrated = true;
+		}
+	});
+
+	let hasBackfilledResource = $state(false);
+	$effect(() => {
+		if (
+			hasHydrated &&
+			!hasBackfilledResource &&
+			resourceQuery.data?.data &&
+			!form.resource_potential_title &&
+			!form.resource_potential_detail
+		) {
+			form.resource_potential_title = resourceQuery.data.data.title || '';
+			form.resource_potential_detail = resourceQuery.data.data.detail || '';
+			hasBackfilledResource = true;
 		}
 	});
 
@@ -513,6 +532,8 @@
 			demographic_education: serializeGenderRows(form.demographic_education),
 			demographic_occupation: serializeGenderRows(form.demographic_occupation),
 			demographic_ages: serializeSliceRows(form.demographic_ages),
+			resource_potential_title: form.resource_potential_title || undefined,
+			resource_potential_detail: form.resource_potential_detail || undefined,
 			latitude: form.latitude ? Number(form.latitude) : undefined,
 			longitude: form.longitude ? Number(form.longitude) : undefined,
 			headmen: form.headmen
@@ -814,6 +835,32 @@
 				<div class="flex justify-end">
 					<Button type="submit" name="section" value="Data infografis" disabled={isSaving}>
 						{isSaving && savingSection === 'Data infografis' ? 'Menyimpan...' : 'Simpan Infografis'}
+					</Button>
+				</div>
+			</section>
+
+			<section class="space-y-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+				<div>
+					<h3 class="text-sm font-bold text-slate-900">Potensi Sumber Daya</h3>
+					<p class="mt-0.5 text-xs font-medium text-slate-500">
+						Judul dan deskripsi keunggulan/potensi desa yang tampil di profil publik.
+					</p>
+				</div>
+				<FloatingInput
+					bind:value={form.resource_potential_title}
+					label="Judul potensi sumber daya"
+					placeholder="Contoh: Potensi Sumber Daya"
+				/>
+				<FloatingTextarea
+					bind:value={form.resource_potential_detail}
+					label="Deskripsi potensi sumber daya"
+					rows={3}
+				/>
+				<div class="flex justify-end">
+					<Button type="submit" name="section" value="Potensi sumber daya" disabled={isSaving}>
+						{isSaving && savingSection === 'Potensi sumber daya'
+							? 'Menyimpan...'
+							: 'Simpan Potensi Sumber Daya'}
 					</Button>
 				</div>
 			</section>

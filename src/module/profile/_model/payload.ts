@@ -49,6 +49,8 @@ export const ProfilePayloadSchema = z.object({
 		.array(z.object({ label: z.string(), male: z.number(), female: z.number() }))
 		.optional(),
 	demographic_ages: z.array(z.object({ label: z.string(), value: z.number() })).optional(),
+	resource_potential_title: z.string().optional(),
+	resource_potential_detail: z.string().optional(),
 	latitude: z.number().optional(),
 	longitude: z.number().optional(),
 	mission: z.array(z.string()).optional(),
