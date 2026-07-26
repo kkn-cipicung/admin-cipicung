@@ -282,11 +282,16 @@
 	}
 
 	function addReligion() {
-		form.demographic_religions = [...form.demographic_religions, { label: '', value: '', color: '' }];
+		form.demographic_religions = [
+			...form.demographic_religions,
+			{ label: '', value: '', color: '' }
+		];
 	}
 
 	function removeReligion(index: number) {
-		form.demographic_religions = form.demographic_religions.filter((_, itemIndex) => itemIndex !== index);
+		form.demographic_religions = form.demographic_religions.filter(
+			(_, itemIndex) => itemIndex !== index
+		);
 	}
 
 	function addReligionRT() {
@@ -297,7 +302,9 @@
 	}
 
 	function removeReligionRT(index: number) {
-		form.demographic_religion_rt = form.demographic_religion_rt.filter((_, itemIndex) => itemIndex !== index);
+		form.demographic_religion_rt = form.demographic_religion_rt.filter(
+			(_, itemIndex) => itemIndex !== index
+		);
 	}
 
 	function addEducation() {
@@ -308,7 +315,9 @@
 	}
 
 	function removeEducation(index: number) {
-		form.demographic_education = form.demographic_education.filter((_, itemIndex) => itemIndex !== index);
+		form.demographic_education = form.demographic_education.filter(
+			(_, itemIndex) => itemIndex !== index
+		);
 	}
 
 	function addOccupation() {
@@ -319,7 +328,9 @@
 	}
 
 	function removeOccupation(index: number) {
-		form.demographic_occupation = form.demographic_occupation.filter((_, itemIndex) => itemIndex !== index);
+		form.demographic_occupation = form.demographic_occupation.filter(
+			(_, itemIndex) => itemIndex !== index
+		);
 	}
 
 	function addAge() {
@@ -378,9 +389,7 @@
 				west_border: data.west_border || '',
 				area: data.area || '',
 				total_male:
-					data.total_male !== undefined && data.total_male !== null
-						? String(data.total_male)
-						: '',
+					data.total_male !== undefined && data.total_male !== null ? String(data.total_male) : '',
 				total_female:
 					data.total_female !== undefined && data.total_female !== null
 						? String(data.total_female)
@@ -597,7 +606,9 @@
 							</Button>
 						</div>
 						{#if form.demographic_religions.length === 0}
-							<p class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400">
+							<p
+								class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400"
+							>
 								Belum ada data agama.
 							</p>
 						{:else}
@@ -630,7 +641,9 @@
 							</Button>
 						</div>
 						{#if form.demographic_religion_rt.length === 0}
-							<p class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400">
+							<p
+								class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400"
+							>
 								Belum ada data agama per RT.
 							</p>
 						{:else}
@@ -664,7 +677,9 @@
 							</Button>
 						</div>
 						{#if form.demographic_education.length === 0}
-							<p class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400">
+							<p
+								class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400"
+							>
 								Belum ada data pendidikan.
 							</p>
 						{:else}
@@ -698,7 +713,9 @@
 							</Button>
 						</div>
 						{#if form.demographic_occupation.length === 0}
-							<p class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400">
+							<p
+								class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400"
+							>
 								Belum ada data pekerjaan.
 							</p>
 						{:else}
@@ -726,13 +743,17 @@
 
 					<div class="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
 						<div class="flex items-center justify-between gap-3">
-							<h4 class="text-xs font-bold uppercase tracking-wide text-slate-600">Kelompok Usia</h4>
+							<h4 class="text-xs font-bold uppercase tracking-wide text-slate-600">
+								Kelompok Usia
+							</h4>
 							<Button type="button" size="sm" variant="outline" onclick={addAge}>
 								<Plus size={14} />Tambah
 							</Button>
 						</div>
 						{#if form.demographic_ages.length === 0}
-							<p class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400">
+							<p
+								class="rounded-lg border border-dashed border-slate-200 p-4 text-center text-xs font-medium text-slate-400"
+							>
 								Belum ada data kelompok usia.
 							</p>
 						{:else}
